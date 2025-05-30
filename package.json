@@ -1,0 +1,70 @@
+{
+	"name": "@tryft/echarts",
+	"version": "0.1.0",
+	"description": "A React component library wrapper for Apache ECharts",
+	"main": "dist/index.js",
+	"module": "dist/index.esm.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview",
+		"storybook": "storybook dev -p 6006",
+		"build-storybook": "storybook build",
+		"lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+		"lint:fix": "eslint src --ext ts,tsx --fix",
+		"type-check": "tsc --noEmit",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [
+		"react",
+		"echarts",
+		"charts",
+		"components",
+		"visualization",
+		"typescript"
+	],
+	"author": "TryFT",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tryft/echarts.git"
+	},
+	"bugs": {
+		"url": "https://github.com/tryft/echarts/issues"
+	},
+	"homepage": "https://github.com/tryft/echarts#readme",
+	"peerDependencies": {
+		"react": "^18.0.0",
+		"react-dom": "^18.0.0"
+	},
+	"dependencies": {
+		"echarts": "^5.4.3"
+	},
+	"devDependencies": {
+		"@types/node": "^22.15.28",
+		"@types/react": "^18.3.12",
+		"@types/react-dom": "^18.3.1",
+		"@typescript-eslint/eslint-plugin": "^8.33.0",
+		"@typescript-eslint/parser": "^8.33.0",
+		"@vitejs/plugin-react": "^4.5.0",
+		"eslint": "^9.27.0",
+		"eslint-plugin-react-hooks": "^5.2.0",
+		"eslint-plugin-react-refresh": "^0.4.20",
+		"@storybook/addon-essentials": "^8.4.7",
+		"@storybook/addon-interactions": "^8.4.7",
+		"@storybook/addon-links": "^8.4.7",
+		"@storybook/blocks": "^8.4.7",
+		"@storybook/react": "^8.4.7",
+		"@storybook/react-vite": "^8.4.7",
+		"@storybook/test": "^8.4.7",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"storybook": "^8.4.7",
+		"typescript": "^5.8.3",
+		"vite": "^6.3.5"
+	}
+}
