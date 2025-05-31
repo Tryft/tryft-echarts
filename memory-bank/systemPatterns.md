@@ -213,6 +213,67 @@ Props Change → Option Regeneration → ECharts setOption → Chart Update
 - Event handlers preserved across re-renders
 - Chart instance reused when possible
 
+## Code Quality Standards
+
+### TypeScript Strict Compliance
+
+#### 1. **NO `any` Types Policy**
+
+- **Rule**: Never use `any` type in any code - use proper TypeScript types
+- **Alternatives**:
+  - Use `unknown` for truly unknown types
+  - Create specific interfaces for complex objects
+  - Use union types for multiple possible types
+  - Use generic constraints for flexible but typed code
+
+```tsx
+// ❌ BAD - Never do this
+function handleClick(event: any) { ... }
+
+// ✅ GOOD - Use proper types
+function handleClick(event: MouseEvent) { ... }
+function handleClick(data: unknown) { ... }
+function handleClick(nodeData: DAGNode, params: unknown) { ... }
+```
+
+#### 2. **Unused Parameter Naming**
+
+- **Rule**: Prefix unused parameters with underscore (`_`)
+- **Rationale**: Prevents ESLint errors while maintaining function signatures
+
+```tsx
+// ✅ GOOD - Unused parameters prefixed
+const onNodeClick = (nodeData: DAGNode, _params: unknown) => {
+  console.log('Clicked:', nodeData.name);
+  // params not used, hence prefixed with _
+};
+```
+
+#### 3. **Type Safety Patterns**
+
+```tsx
+// Complex object typing with type assertions
+const connectivity = (
+  nodeData as DAGNode & {
+    _connectivity?: {
+      incoming: unknown[];
+      outgoing: unknown[];
+    };
+  }
+)._connectivity;
+
+// Generic function patterns
+function processData<T extends BaseData>(data: T): ProcessedData<T> {
+  // Implementation with proper typing
+}
+```
+
+### ESLint Integration
+
+- **Pre-commit hooks**: Automatically check for `any` types and unused parameters
+- **Build process**: Fails on TypeScript strict mode violations
+- **Development**: VS Code shows real-time TypeScript errors
+
 ## Error Handling Patterns
 
 ### 1. Graceful Degradation

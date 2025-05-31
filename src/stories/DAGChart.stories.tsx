@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DAGChart } from '../components/DAGChart';
+import type { DAGNode, DAGLink } from '../types';
 
 // Sample data for stories
 const sampleDAGData = {
@@ -241,17 +242,18 @@ export const Default: Story = {
   args: {
     data: sampleDAGData,
     showEdgeLabels: true,
-    onNodeClick: (nodeData, _params) => {
+    onNodeClick: (nodeData: DAGNode, _params: unknown) => {
       console.log('Node clicked:', nodeData.name);
-      const connectivity = (nodeData as { _connectivity?: { incoming: unknown[]; outgoing: unknown[] } })._connectivity;
+      const connectivity = (nodeData as DAGNode & { _connectivity?: { incoming: unknown[]; outgoing: unknown[] } })
+        ._connectivity;
       alert(
         `Node: ${nodeData.name}\nConnections: ${connectivity?.incoming.length || 0} in, ${connectivity?.outgoing.length || 0} out`,
       );
     },
-    onNodeDoubleClick: (nodeData, _params) => {
+    onNodeDoubleClick: (nodeData: DAGNode, _params: unknown) => {
       console.log('Node double-clicked (branch toggle):', nodeData.name);
     },
-    onEdgeClick: (linkData, _params) => {
+    onEdgeClick: (linkData: DAGLink, _params: unknown) => {
       console.log('Edge clicked:', linkData.source, '→', linkData.target);
       alert(`Relationship: ${linkData.source} ${linkData.label || 'connects to'} ${linkData.target}`);
     },
@@ -484,7 +486,7 @@ export const ForceDirectedLayout: Story = {
       friction: 0.6,
       layoutAnimation: true,
     },
-    onNodeClick: (nodeData, _params) => {
+    onNodeClick: (nodeData: DAGNode, _params: unknown) => {
       console.log('Force layout node clicked:', nodeData.name);
       alert(`Node: ${nodeData.name}\nHover over nodes/edges to see branch highlighting!`);
     },

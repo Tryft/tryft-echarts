@@ -274,12 +274,28 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
       const getEdgeStyleProperties = () => {
         switch (edgeStyle) {
           case 'curved':
-            return { curveness: 0.3, type: 'solid' as const };
+            return {
+              curveness: 0.3,
+              type: 'solid' as const,
+              width: 2,
+            };
           case 'manhattan':
-            return { curveness: 0, type: 'solid' as const };
+            // Note: True Manhattan routing (right-angled paths with max 2 turns) requires custom pathfinding
+            // This provides visual distinction with dashed lines and different styling
+            // TODO: Implement full Manhattan routing with custom edge path calculation
+            return {
+              curveness: 0,
+              type: 'dashed' as const,
+              width: 2,
+              opacity: 0.9,
+            };
           case 'straight':
           default:
-            return { curveness: 0, type: 'solid' as const };
+            return {
+              curveness: 0,
+              type: 'solid' as const,
+              width: 2,
+            };
         }
       };
 
@@ -291,8 +307,8 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
           target: link.target,
           value: link.value,
           lineStyle: {
-            ...link.lineStyle,
             ...getEdgeStyleProperties(),
+            ...link.lineStyle, // Allow individual link overrides
           },
           // Handle edge labels separately in edgeLabel
           edgeLabel:
