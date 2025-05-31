@@ -22,15 +22,15 @@ jobs:
         id: commit-info
         run: |
           # Get the latest commit message (full body) and author
-          COMMIT_MESSAGE=$(git log -1 --pretty=format:"%B")
           COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an")
           COMMIT_HASH=$(git log -1 --pretty=format:"%h")
           COMMIT_DATE=$(git log -1 --pretty=format:"%ad" --date=iso | sed 's/+0000/UTC/' | sed 's/+0530/UTC/')
 
-          # Escape special characters for JSON
-          COMMIT_MESSAGE_ESCAPED=$(echo "$COMMIT_MESSAGE" | sed 's/"/\\"/g' | sed "s/'/\\'/g")
+          # Handle multiline commit message using GitHub Actions multiline output format
+          echo "message<<EOF" >> $GITHUB_OUTPUT
+          git log -1 --pretty=format:"%B" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-          echo "message=$COMMIT_MESSAGE_ESCAPED" >> $GITHUB_OUTPUT
           echo "author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
           echo "hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
           echo "date=$COMMIT_DATE" >> $GITHUB_OUTPUT
