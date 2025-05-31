@@ -1,6 +1,6 @@
 import { forwardRef, useMemo } from 'react';
 import { BaseEChart } from '@/components/BaseEChart';
-import type { TreeChartProps, EChartsRef } from '@/types';
+import type { TreeChartProps, EChartsRef, TreeNodeData } from '@/types';
 import type { EChartsOption } from 'echarts';
 
 /**
@@ -33,6 +33,7 @@ export const TreeChart = forwardRef<EChartsRef, TreeChartProps>(
       orient = 'LR',
       symbol = 'emptyCircle',
       symbolSize = 20,
+      onNodeClick,
       option: customOption,
       ...props
     },
@@ -108,7 +109,7 @@ export const TreeChart = forwardRef<EChartsRef, TreeChartProps>(
         series: [
           {
             type: 'tree',
-            data: [data || {}],
+            data: Array.isArray(data) ? data : [data || {}],
             top: '80px',
             left: '7%',
             bottom: '20px',
@@ -210,7 +211,25 @@ export const TreeChart = forwardRef<EChartsRef, TreeChartProps>(
       return customOption ? { ...generatedOption, ...customOption } : generatedOption;
     }, [data, layout, orient, symbol, symbolSize, customOption]);
 
-    return <BaseEChart ref={ref} option={option} {...props} />;
+    const enhancedProps = {
+      ...props,
+      onEvents: {
+        ...props.onEvents,
+        ...(onNodeClick && {
+          click: (params: unknown) => {
+            const typedParams = params as { data?: TreeNodeData };
+            if (typedParams.data && onNodeClick) {
+              // Add small delay to ensure expansion animation completes
+              setTimeout(() => {
+                onNodeClick(typedParams.data!, params);
+              }, 100);
+            }
+          },
+        }),
+      },
+    };
+
+    return <BaseEChart ref={ref} option={option} {...enhancedProps} />;
   },
 );
 

@@ -60,6 +60,14 @@ export default [
 
       // Enforce TypeScript strict typing
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
 
       // Code style and formatting rules
       semi: ['error', 'always'],

@@ -90,8 +90,8 @@ export interface TreeNodeData {
 }
 
 export interface TreeChartProps extends BaseEChartsProps {
-  /** Data for the tree chart */
-  data?: TreeNodeData;
+  /** Data for the tree chart - can be single node or array for multiple root nodes */
+  data?: TreeNodeData | TreeNodeData[];
   /** Tree layout orientation */
   layout?: 'orthogonal' | 'radial';
   /** Tree orientation */
@@ -100,6 +100,8 @@ export interface TreeChartProps extends BaseEChartsProps {
   symbol?: string;
   /** Symbol size for nodes */
   symbolSize?: number | number[];
+  /** Callback when a node is clicked (called after expansion animation) */
+  onNodeClick?: (nodeData: TreeNodeData, params: unknown) => void;
 }
 
 export interface TreemapChartProps extends BaseEChartsProps {
