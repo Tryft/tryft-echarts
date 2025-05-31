@@ -1,6 +1,6 @@
 import { forwardRef, useMemo } from 'react';
-import { BaseEChart } from './BaseEChart';
-import type { TreeChartProps, EChartsRef } from '../types';
+import { BaseEChart } from '@/components/BaseEChart';
+import type { TreeChartProps, EChartsRef } from '@/types';
 import type { EChartsOption } from 'echarts';
 
 /**

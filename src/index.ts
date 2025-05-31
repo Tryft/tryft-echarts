@@ -1,11 +1,11 @@
 // Components
-export * from './components';
+export * from '@/components';
 
 // Hooks
-export * from './hooks';
+export * from '@/hooks';
 
 // Types
-export * from './types';
+export * from '@/types';
 
 // Re-export echarts for convenience
 import * as echarts from 'echarts';

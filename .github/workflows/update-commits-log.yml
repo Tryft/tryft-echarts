@@ -8,6 +8,9 @@ jobs:
   update-commits-log:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     # Prevent infinite loop by checking if the commit is not from this action
     if: github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, '[skip-commits-log]')
 

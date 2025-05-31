@@ -1,6 +1,6 @@
 import { forwardRef, useImperativeHandle, useEffect, useCallback } from 'react';
-import { useECharts } from '../hooks/useECharts';
-import type { BaseEChartsProps, EChartsRef } from '../types';
+import { useECharts } from '@/hooks/useECharts';
+import type { BaseEChartsProps, EChartsRef } from '@/types';
 
 /**
  * Base ECharts component that provides common functionality for all chart types
