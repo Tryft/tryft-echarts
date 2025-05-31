@@ -33,11 +33,14 @@ jobs:
 
       - name: Run npm audit
         run: |
-          echo "## Security Audit Report" > security-audit-report.md
-          echo "" >> security-audit-report.md
-          echo "Generated on: $(date)" >> security-audit-report.md
-          echo "" >> security-audit-report.md
-          echo "### Summary" >> security-audit-report.md
+          {
+            echo "## Security Audit Report"
+            echo ""
+            echo "Generated on: $(date)"
+            echo ""
+            echo "### Summary"
+          } > security-audit-report.md
+
           npm audit --audit-level=info --json > audit-raw.json || true
 
           # Parse audit results
@@ -47,27 +50,37 @@ jobs:
             DEPENDENCIES=$(cat audit-raw.json | jq -r '.metadata.dependencies // 0' 2>/dev/null || echo "Unknown")
             DEV_DEPENDENCIES=$(cat audit-raw.json | jq -r '.metadata.devDependencies // 0' 2>/dev/null || echo "Unknown")
             
-            echo "- Total dependencies: $DEPENDENCIES" >> security-audit-report.md
-            echo "- Development dependencies: $DEV_DEPENDENCIES" >> security-audit-report.md
-            echo "" >> security-audit-report.md
-            echo "### Vulnerabilities" >> security-audit-report.md
-            echo '```' >> security-audit-report.md
-            echo "$VULNERABILITIES" >> security-audit-report.md
-            echo '```' >> security-audit-report.md
-            echo "" >> security-audit-report.md
+            {
+              echo "- Total dependencies: $DEPENDENCIES"
+              echo "- Development dependencies: $DEV_DEPENDENCIES"
+              echo ""
+              echo "### Vulnerabilities"
+              echo '```'
+              echo "$VULNERABILITIES"
+              echo '```'
+              echo ""
+            } >> security-audit-report.md
           fi
 
-          echo "### Detailed Audit Output" >> security-audit-report.md
-          echo '```' >> security-audit-report.md
+          {
+            echo "### Detailed Audit Output"
+            echo '```'
+          } >> security-audit-report.md
+
           npm audit --audit-level=info >> security-audit-report.md 2>&1 || echo "Audit completed with findings" >> security-audit-report.md
+
           echo '```' >> security-audit-report.md
 
       - name: Run npm audit fix (dry run)
         run: |
-          echo "" >> security-audit-report.md
-          echo "### Potential Fixes" >> security-audit-report.md
-          echo '```' >> security-audit-report.md
+          {
+            echo ""
+            echo "### Potential Fixes"
+            echo '```'
+          } >> security-audit-report.md
+
           npm audit fix --dry-run >> security-audit-report.md 2>&1 || echo "No automatic fixes available" >> security-audit-report.md
+
           echo '```' >> security-audit-report.md
         continue-on-error: true
 

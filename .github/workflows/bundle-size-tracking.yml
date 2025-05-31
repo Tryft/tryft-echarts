@@ -135,26 +135,26 @@ jobs:
 
       - name: Create bundle size report
         run: |
-          cat << 'EOF' > bundle-size-report.md
-          ## 📦 Bundle Size Report
-
-          | Format | Size | Gzipped | Change |
-          |--------|------|---------|--------|
-          | ESM | ${{ steps.current-size.outputs.esm_size_kb }} KB | ${{ steps.current-size.outputs.esm_gzip_kb }} KB | ${{ steps.size-diff.outputs.esm_trend }} ${{ steps.size-diff.outputs.esm_change_text }} |
-          | UMD | ${{ steps.current-size.outputs.umd_size_kb }} KB | ${{ steps.current-size.outputs.umd_gzip_kb }} KB | - |
-
-          ### Details
-          - **ESM Bundle**: Modern ES modules format, tree-shakable
-          - **UMD Bundle**: Universal module definition, compatible with CommonJS, AMD, and global variables
-          - **Gzipped sizes** represent what users actually download
-
-          ### Size Guidelines
-          - 🟢 **Good**: < 100 KB gzipped
-          - 🟡 **Warning**: 100-500 KB gzipped  
-          - 🔴 **Large**: > 500 KB gzipped
-
-          *Bundle sizes are automatically tracked on every commit to main.*
-          EOF
+          {
+            echo "## 📦 Bundle Size Report"
+            echo ""
+            echo "| Format | Size | Gzipped | Change |"
+            echo "|--------|------|---------|---------|"
+            echo "| ESM | ${{ steps.current-size.outputs.esm_size_kb }} KB | ${{ steps.current-size.outputs.esm_gzip_kb }} KB | ${{ steps.size-diff.outputs.esm_trend }} ${{ steps.size-diff.outputs.esm_change_text }} |"
+            echo "| UMD | ${{ steps.current-size.outputs.umd_size_kb }} KB | ${{ steps.current-size.outputs.umd_gzip_kb }} KB | - |"
+            echo ""
+            echo "### Details"
+            echo "- **ESM Bundle**: Modern ES modules format, tree-shakable"
+            echo "- **UMD Bundle**: Universal module definition, compatible with CommonJS, AMD, and global variables"
+            echo "- **Gzipped sizes** represent what users actually download"
+            echo ""
+            echo "### Size Guidelines"
+            echo "- 🟢 **Good**: < 100 KB gzipped"
+            echo "- 🟡 **Warning**: 100-500 KB gzipped"
+            echo "- 🔴 **Large**: > 500 KB gzipped"
+            echo ""
+            echo "*Bundle sizes are automatically tracked on every commit to main.*"
+          } > bundle-size-report.md
 
       - name: Comment on PR (if this is a PR)
         if: github.event_name == 'pull_request'
