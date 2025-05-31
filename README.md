@@ -327,18 +327,40 @@ function MyComponent() {
    # This opens interactive component documentation at http://localhost:6006
    ```
 
-### Automatic Deployment
+### Automated Workflows
 
-This repository uses GitHub Actions to automatically:
+This repository uses GitHub Actions for comprehensive automation:
 
 - ✅ **Build Storybook** when main branch is updated
 - ✅ **Deploy to GitHub Pages** for live documentation
-- ✅ **Run Quality Checks** (TypeScript + ESLint)
+- ✅ **Run Quality Checks** (TypeScript + ESLint + Security audits)
+- ✅ **Automated Commit History** - Maintains `COMMITS.md` with readable commit logs
 - ✅ **Provide Manual Triggers** for on-demand deployment
 
 **Live Documentation:** [https://tryft.github.io/echarts/](https://tryft.github.io/echarts/)
 
-For detailed deployment setup instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
+#### Commit History Automation
+
+The repository automatically maintains a human-readable commit history in `COMMITS.md`. Every time you push to the main branch, a GitHub Action:
+
+- Extracts commit information (message, author, hash, timestamp)
+- Updates `COMMITS.md` with the latest commit at the top
+- Prevents infinite loops with smart filtering
+- Provides quick access to recent changes without Git commands
+
+**Example commit entry:**
+
+```markdown
+## 2024-12-05 14:30:25 UTC
+
+**Commit:** `abc1234`
+**Author:** John Doe
+**Message:** feat: add new chart component
+
+---
+```
+
+For detailed workflow documentation, see [WORKFLOWS.md](WORKFLOWS.md).
 
 ### Development Scripts
 

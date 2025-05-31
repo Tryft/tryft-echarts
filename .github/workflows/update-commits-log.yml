@@ -1,0 +1,77 @@
+name: Update Commits Log
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  update-commits-log:
+    runs-on: ubuntu-latest
+
+    # Prevent infinite loop by checking if the commit is not from this action
+    if: github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, '[skip-commits-log]')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get commit information
+        id: commit-info
+        run: |
+          # Get the latest commit message and author
+          COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an")
+          COMMIT_HASH=$(git log -1 --pretty=format:"%h")
+          COMMIT_DATE=$(git log -1 --pretty=format:"%Y-%m-%d %H:%M:%S UTC" --date=utc)
+
+          # Escape special characters for JSON
+          COMMIT_MESSAGE_ESCAPED=$(echo "$COMMIT_MESSAGE" | sed 's/"/\\"/g' | sed "s/'/\\'/g")
+
+          echo "message=$COMMIT_MESSAGE_ESCAPED" >> $GITHUB_OUTPUT
+          echo "author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
+          echo "hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+          echo "date=$COMMIT_DATE" >> $GITHUB_OUTPUT
+
+      - name: Update Commits.md
+        run: |
+          # Create Commits.md if it doesn't exist
+          if [ ! -f COMMITS.md ]; then
+            echo "# Commit History" > COMMITS.md
+            echo "" >> COMMITS.md
+            echo "This file is automatically updated with commit messages from the main branch." >> COMMITS.md
+            echo "" >> COMMITS.md
+          fi
+
+          # Create temporary file with new entry
+          echo "## ${{ steps.commit-info.outputs.date }}" > temp_commits.md
+          echo "" >> temp_commits.md
+          echo "**Commit:** \`${{ steps.commit-info.outputs.hash }}\`" >> temp_commits.md
+          echo "**Author:** ${{ steps.commit-info.outputs.author }}" >> temp_commits.md
+          echo "**Message:** ${{ steps.commit-info.outputs.message }}" >> temp_commits.md
+          echo "" >> temp_commits.md
+          echo "---" >> temp_commits.md
+          echo "" >> temp_commits.md
+
+          # Skip the header lines and prepend new entry
+          tail -n +4 COMMITS.md >> temp_commits.md
+
+          # Replace original file
+          mv temp_commits.md COMMITS.md
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "github-actions[bot]"
+
+          # Check if there are changes to commit
+          if git diff --quiet COMMITS.md; then
+            echo "No changes to COMMITS.md"
+            exit 0
+          fi
+
+          git add COMMITS.md
+          git commit -m "docs: update commit history [skip-commits-log]"
+          git push
