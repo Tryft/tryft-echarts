@@ -29,10 +29,9 @@ jobs:
           COMMIT_HASH=$(git log -1 --pretty=format:"%h")
           COMMIT_DATE=$(git log -1 --pretty=format:"%ad" --date=iso | sed 's/+0000/UTC/' | sed 's/+0530/UTC/')
 
-          # Handle multiline commit message using GitHub Actions multiline output format
-          echo "message<<EOF" >> $GITHUB_OUTPUT
-          git log -1 --pretty=format:"%B" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Handle multiline commit message safely without EOF delimiter
+          COMMIT_MESSAGE=$(git log -1 --pretty=format:"%B" | tr '\n' ' ' | sed 's/[ ]*$//')
+          echo "message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
 
           echo "author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
           echo "hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
@@ -42,21 +41,25 @@ jobs:
         run: |
           # Create Commits.md if it doesn't exist
           if [ ! -f COMMITS.md ]; then
-            echo "# Commit History" > COMMITS.md
-            echo "" >> COMMITS.md
-            echo "This file is automatically updated with commit messages from the main branch." >> COMMITS.md
-            echo "" >> COMMITS.md
+            {
+              echo "# Commit History"
+              echo ""
+              echo "This file is automatically updated with commit messages from the main branch."
+              echo ""
+            } > COMMITS.md
           fi
 
           # Create temporary file with new entry
-          echo "## ${{ steps.commit-info.outputs.date }}" > temp_commits.md
-          echo "" >> temp_commits.md
-          echo "**Commit:** \`${{ steps.commit-info.outputs.hash }}\`" >> temp_commits.md
-          echo "**Author:** ${{ steps.commit-info.outputs.author }}" >> temp_commits.md
-          echo "**Message:** ${{ steps.commit-info.outputs.message }}" >> temp_commits.md
-          echo "" >> temp_commits.md
-          echo "---" >> temp_commits.md
-          echo "" >> temp_commits.md
+          {
+            echo "## ${{ steps.commit-info.outputs.date }}"
+            echo ""
+            echo "**Commit:** \`${{ steps.commit-info.outputs.hash }}\`"
+            echo "**Author:** ${{ steps.commit-info.outputs.author }}"
+            echo "**Message:** ${{ steps.commit-info.outputs.message }}"
+            echo ""
+            echo "---"
+            echo ""
+          } > temp_commits.md
 
           # Skip the header lines and prepend new entry
           tail -n +4 COMMITS.md >> temp_commits.md
