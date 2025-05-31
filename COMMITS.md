@@ -1,6 +1,18 @@
-# Commit History
+## 2025-05-31 08:48:14 UTC
 
-This file is automatically updated with commit messages from the main branch.
+**Commit:** `1685102`
+**Author:** Jagadish, K.
+**Message:** feat: implement absolute path imports with '@' alias and fix GitHub configuration
+
+- Configure Vite and TypeScript for '@' alias pointing to src directory
+- Update all component imports to use absolute '@/' paths instead of relative paths
+- Fix GitHub Pages URL from Tryft.github.io to tryft.github.io (lowercase)
+- Add contents: write permission to GitHub Actions workflow to fix push permissions
+- Ensure consistent absolute import patterns across all source files
+- Library will be importable as '@tryft/echarts' for external usage
+
+---
+
 
 ## 2025-05-31 02:42:38 +0000
 
