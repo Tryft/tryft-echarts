@@ -77,7 +77,7 @@ The core tryft/echarts library has been successfully implemented and is ready fo
 - **Quality Checks**: TypeScript and ESLint validation before deployment
 - **Manual Triggers**: On-demand deployment capability
 - **Documentation**: Complete setup guide in DEPLOYMENT.md
-- **Live URL**: https://tryft.github.io/echarts/
+- **Live URL**: https://Tryft.github.io/tryft-echarts/
 
 ### Optional Future Enhancements
 

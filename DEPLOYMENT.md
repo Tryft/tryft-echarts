@@ -44,7 +44,7 @@ After successful deployment, your Storybook will be available at:
 https://<username>.github.io/<repository-name>/
 ```
 
-For example: `https://tryft.github.io/echarts/`
+For example: `https://Tryft.github.io/tryft-echarts/`
 
 ### Local Testing
 

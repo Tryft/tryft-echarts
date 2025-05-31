@@ -16,7 +16,7 @@ A powerful React component library built on top of Apache ECharts, providing eas
 
 ## Live Documentation
 
-📚 **[View Live Storybook Documentation](https://tryft.github.io/echarts/)** - Interactive examples and API documentation
+📚 **[View Live Storybook Documentation](https://Tryft.github.io/tryft-echarts/)** - Interactive examples and API documentation
 
 > The documentation is automatically built and deployed to GitHub Pages whenever the main branch is updated.
 
@@ -337,7 +337,7 @@ This repository uses GitHub Actions for comprehensive automation:
 - ✅ **Automated Commit History** - Maintains `COMMITS.md` with readable commit logs
 - ✅ **Provide Manual Triggers** for on-demand deployment
 
-**Live Documentation:** [https://tryft.github.io/echarts/](https://tryft.github.io/echarts/)
+**Live Documentation:** [https://Tryft.github.io/tryft-echarts/](https://Tryft.github.io/tryft-echarts/)
 
 #### Commit History Automation
 
