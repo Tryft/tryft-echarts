@@ -46,6 +46,7 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
       data,
       layout = 'layered',
       direction = 'LR',
+      edgeStyle = 'straight',
       draggable = true,
       roam = true,
       showEdgeLabels = false,
@@ -269,7 +270,20 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
             draggable: node.draggable !== false ? draggable : false,
           }));
 
-      // Create ECharts compatible links without our custom label property
+      // Calculate edge style properties based on edgeStyle prop
+      const getEdgeStyleProperties = () => {
+        switch (edgeStyle) {
+          case 'curved':
+            return { curveness: 0.3, type: 'solid' as const };
+          case 'manhattan':
+            return { curveness: 0, type: 'solid' as const };
+          case 'straight':
+          default:
+            return { curveness: 0, type: 'solid' as const };
+        }
+      };
+
+      // Create ECharts compatible links with proper edge styling
       const echartsLinks = processedData.links
         .filter((link) => !link.hidden)
         .map((link) => ({
@@ -278,8 +292,7 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
           value: link.value,
           lineStyle: {
             ...link.lineStyle,
-            type: 'solid' as const,
-            curveness: 0, // Manhattan style - no curves
+            ...getEdgeStyleProperties(),
           },
           // Handle edge labels separately in edgeLabel
           edgeLabel:
@@ -499,6 +512,7 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
       calculateLabelPosition,
       highlightedBranch,
       collapsible,
+      edgeStyle,
     ]);
 
     /**

@@ -1,5 +1,162 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DAGChart } from '../components/DAGChart';
+
+// Sample data for stories
+const sampleDAGData = {
+  nodes: [
+    // Level 0 - Raw Materials (source nodes - labels on left)
+    {
+      id: 'steel',
+      name: 'Steel Sheets',
+      value: 20,
+      level: 0,
+      category: 0,
+      description: 'High-grade steel material for chassis',
+    },
+    {
+      id: 'aluminum',
+      name: 'Aluminum',
+      value: 15,
+      level: 0,
+      category: 0,
+      description: 'Lightweight aluminum alloy',
+    },
+    {
+      id: 'plastic',
+      name: 'ABS Plastic',
+      value: 8,
+      level: 0,
+      category: 0,
+      description: 'Durable thermoplastic',
+    },
+    {
+      id: 'electronics',
+      name: 'Electronics',
+      value: 12,
+      level: 0,
+      category: 0,
+      description: 'Circuit boards and sensors',
+    },
+
+    // Level 1 - Primary Components (middle nodes - labels below)
+    {
+      id: 'frame',
+      name: 'Main Frame',
+      value: 35,
+      level: 1,
+      category: 1,
+      description: 'Structural chassis assembly',
+    },
+    {
+      id: 'housing',
+      name: 'Housing',
+      value: 23,
+      level: 1,
+      category: 1,
+      description: 'Protective outer shell',
+    },
+    {
+      id: 'control_unit',
+      name: 'Control Unit',
+      value: 18,
+      level: 1,
+      category: 1,
+      description: 'Electronic control system',
+    },
+
+    // Level 2 - Sub-Assemblies (middle nodes - labels below)
+    {
+      id: 'mechanical_assy',
+      name: 'Mechanical Assembly',
+      value: 58,
+      level: 2,
+      category: 2,
+      description: 'Integrated mechanical components',
+    },
+    {
+      id: 'electronic_assy',
+      name: 'Electronic Assembly',
+      value: 41,
+      level: 2,
+      category: 2,
+      description: 'Integrated electronic systems',
+    },
+
+    // Level 3 - Final Products (terminal nodes - labels on right)
+    {
+      id: 'product_a',
+      name: 'Product A',
+      value: 100,
+      level: 3,
+      category: 3,
+      description: 'Standard configuration device',
+    },
+    {
+      id: 'product_b',
+      name: 'Product B',
+      value: 120,
+      level: 3,
+      category: 3,
+      description: 'Premium configuration device',
+    },
+  ],
+  links: [
+    // Raw materials to components with relationship labels
+    { source: 'steel', target: 'frame', value: 15, label: 'forms' },
+    { source: 'aluminum', target: 'frame', value: 10, label: 'reinforces' },
+    { source: 'aluminum', target: 'housing', value: 8, label: 'shapes' },
+    { source: 'plastic', target: 'housing', value: 6, label: 'protects' },
+    { source: 'electronics', target: 'control_unit', value: 12, label: 'powers' },
+
+    // Components to sub-assemblies
+    { source: 'frame', target: 'mechanical_assy', value: 25, label: 'integrates into' },
+    { source: 'housing', target: 'mechanical_assy', value: 15, label: 'encloses' },
+    { source: 'control_unit', target: 'electronic_assy', value: 18, label: 'controls' },
+    { source: 'housing', target: 'electronic_assy', value: 8, label: 'houses' },
+
+    // Sub-assemblies to final products
+    { source: 'mechanical_assy', target: 'product_a', value: 40, label: 'assembles into' },
+    { source: 'electronic_assy', target: 'product_a', value: 25, label: 'operates' },
+    { source: 'mechanical_assy', target: 'product_b', value: 45, label: 'assembles into' },
+    { source: 'electronic_assy', target: 'product_b', value: 30, label: 'operates' },
+
+    // Cross-level dependency
+    { source: 'steel', target: 'mechanical_assy', value: 5, label: 'directly reinforces' },
+  ],
+  categories: [
+    { name: 'Raw Materials', itemStyle: { color: '#3498db' } },
+    { name: 'Components', itemStyle: { color: '#e74c3c' } },
+    { name: 'Sub-Assemblies', itemStyle: { color: '#f39c12' } },
+    { name: 'Final Products', itemStyle: { color: '#2ecc71' } },
+    { name: 'Documentation', itemStyle: { color: '#9b59b6' } },
+  ],
+};
+
+// Simpler data for edge style comparison
+const edgeStyleData = {
+  nodes: [
+    { id: 'input', name: 'Input Node', level: 0, category: 0, value: 50 },
+    { id: 'middle1', name: 'Middle Node 1', level: 1, category: 1, value: 30 },
+    { id: 'middle2', name: 'Middle Node 2', level: 1, category: 1, value: 25 },
+    { id: 'middle3', name: 'Middle Node 3', level: 1, category: 1, value: 20 },
+    { id: 'output1', name: 'Output 1', level: 2, category: 2, value: 35 },
+    { id: 'output2', name: 'Output 2', level: 2, category: 2, value: 40 },
+  ],
+  links: [
+    { source: 'input', target: 'middle1', value: 15, label: 'flow 1' },
+    { source: 'input', target: 'middle2', value: 12, label: 'flow 2' },
+    { source: 'input', target: 'middle3', value: 10, label: 'flow 3' },
+    { source: 'middle1', target: 'output1', value: 18, label: 'process A' },
+    { source: 'middle2', target: 'output1', value: 8, label: 'merge' },
+    { source: 'middle2', target: 'output2', value: 15, label: 'process B' },
+    { source: 'middle3', target: 'output2', value: 12, label: 'enhance' },
+  ],
+  categories: [
+    { name: 'Input', itemStyle: { color: '#3498db' } },
+    { name: 'Processing', itemStyle: { color: '#e74c3c' } },
+    { name: 'Output', itemStyle: { color: '#2ecc71' } },
+  ],
+};
 
 const meta = {
   title: 'Charts/DAGChart',
@@ -15,182 +172,80 @@ const meta = {
   },
   tags: ['autodocs'],
   argTypes: {
-    width: { control: 'text' },
-    height: { control: 'number' },
-    loading: { control: 'boolean' },
+    width: {
+      control: { type: 'number', min: 400, max: 1600, step: 50 },
+      description: 'Chart width in pixels',
+    },
+    height: {
+      control: { type: 'number', min: 300, max: 1200, step: 50 },
+      description: 'Chart height in pixels',
+    },
+    loading: {
+      control: 'boolean',
+      description: 'Show loading state',
+    },
     layout: {
-      control: 'select',
+      control: { type: 'select' },
       options: ['layered', 'force'],
+      description: 'Chart layout algorithm',
     },
     direction: {
-      control: 'select',
+      control: { type: 'select' },
       options: ['LR', 'TB'],
+      description: 'Layout direction: Left-to-Right or Top-to-Bottom',
     },
-    draggable: { control: 'boolean' },
-    roam: { control: 'boolean' },
-    showEdgeLabels: { control: 'boolean' },
-    collapsible: { control: 'boolean' },
+    edgeStyle: {
+      control: { type: 'select' },
+      options: ['straight', 'curved', 'manhattan'],
+      description: 'Edge rendering style: straight (direct lines), curved (bezier curves), manhattan (right-angled)',
+    },
+    draggable: {
+      control: 'boolean',
+      description: 'Allow nodes to be dragged',
+    },
+    roam: {
+      control: 'boolean',
+      description: 'Allow chart panning and zooming',
+    },
+    showEdgeLabels: {
+      control: 'boolean',
+      description: 'Display labels on edges',
+    },
+    collapsible: {
+      control: 'boolean',
+      description: 'Allow branch collapsing on double-click',
+    },
+    data: {
+      control: false,
+      description: 'Chart data (nodes, links, categories)',
+    },
+  },
+  args: {
+    width: 1000,
+    height: 600,
+    loading: false,
+    layout: 'layered',
+    direction: 'LR',
+    edgeStyle: 'straight',
+    draggable: true,
+    roam: true,
+    showEdgeLabels: false,
+    collapsible: true,
   },
 } satisfies Meta<typeof DAGChart>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const EnhancedManufacturingFlow: Story = {
-  name: 'Enhanced Manufacturing Flow (All Features)',
+export const Default: Story = {
   args: {
-    width: 1200,
-    height: 700,
-    layout: 'layered',
-    direction: 'LR',
-    draggable: true,
-    roam: true,
+    data: sampleDAGData,
     showEdgeLabels: true,
-    collapsible: true,
-    data: {
-      nodes: [
-        // Level 0 - Raw Materials (source nodes - labels on left)
-        {
-          id: 'steel',
-          name: 'Steel Sheets',
-          value: 20,
-          level: 0,
-          category: 0,
-          description: 'High-grade steel material for chassis',
-        },
-        {
-          id: 'aluminum',
-          name: 'Aluminum',
-          value: 15,
-          level: 0,
-          category: 0,
-          description: 'Lightweight aluminum alloy',
-        },
-        {
-          id: 'plastic',
-          name: 'ABS Plastic',
-          value: 8,
-          level: 0,
-          category: 0,
-          description: 'Durable thermoplastic',
-        },
-        {
-          id: 'electronics',
-          name: 'Electronics',
-          value: 12,
-          level: 0,
-          category: 0,
-          description: 'Circuit boards and sensors',
-        },
-
-        // Level 1 - Primary Components (middle nodes - labels below)
-        {
-          id: 'frame',
-          name: 'Main Frame',
-          value: 35,
-          level: 1,
-          category: 1,
-          description: 'Structural chassis assembly',
-        },
-        {
-          id: 'housing',
-          name: 'Housing',
-          value: 23,
-          level: 1,
-          category: 1,
-          description: 'Protective outer shell',
-        },
-        {
-          id: 'control_unit',
-          name: 'Control Unit',
-          value: 18,
-          level: 1,
-          category: 1,
-          description: 'Electronic control system',
-        },
-
-        // Level 2 - Sub-Assemblies (middle nodes - labels below)
-        {
-          id: 'mechanical_assy',
-          name: 'Mechanical Assembly',
-          value: 58,
-          level: 2,
-          category: 2,
-          description: 'Integrated mechanical components',
-        },
-        {
-          id: 'electronic_assy',
-          name: 'Electronic Assembly',
-          value: 41,
-          level: 2,
-          category: 2,
-          description: 'Integrated electronic systems',
-        },
-
-        // Level 3 - Final Products (terminal nodes - labels on right)
-        {
-          id: 'product_a',
-          name: 'Product A',
-          value: 100,
-          level: 3,
-          category: 3,
-          description: 'Standard configuration device',
-        },
-        {
-          id: 'product_b',
-          name: 'Product B',
-          value: 120,
-          level: 3,
-          category: 3,
-          description: 'Premium configuration device',
-        },
-
-        // Isolated node (label above)
-        {
-          id: 'quality_cert',
-          name: 'Quality Certificate',
-          value: 5,
-          level: 1,
-          category: 4,
-          description: 'Quality assurance documentation',
-        },
-      ],
-      links: [
-        // Raw materials to components with relationship labels
-        { source: 'steel', target: 'frame', value: 15, label: 'forms' },
-        { source: 'aluminum', target: 'frame', value: 10, label: 'reinforces' },
-        { source: 'aluminum', target: 'housing', value: 8, label: 'shapes' },
-        { source: 'plastic', target: 'housing', value: 6, label: 'protects' },
-        { source: 'electronics', target: 'control_unit', value: 12, label: 'powers' },
-
-        // Components to sub-assemblies
-        { source: 'frame', target: 'mechanical_assy', value: 25, label: 'integrates into' },
-        { source: 'housing', target: 'mechanical_assy', value: 15, label: 'encloses' },
-        { source: 'control_unit', target: 'electronic_assy', value: 18, label: 'controls' },
-        { source: 'housing', target: 'electronic_assy', value: 8, label: 'houses' },
-
-        // Sub-assemblies to final products
-        { source: 'mechanical_assy', target: 'product_a', value: 40, label: 'assembles into' },
-        { source: 'electronic_assy', target: 'product_a', value: 25, label: 'operates' },
-        { source: 'mechanical_assy', target: 'product_b', value: 45, label: 'assembles into' },
-        { source: 'electronic_assy', target: 'product_b', value: 30, label: 'operates' },
-
-        // Cross-level dependency
-        { source: 'steel', target: 'mechanical_assy', value: 5, label: 'directly reinforces' },
-      ],
-      categories: [
-        { name: 'Raw Materials', itemStyle: { color: '#3498db' } },
-        { name: 'Components', itemStyle: { color: '#e74c3c' } },
-        { name: 'Sub-Assemblies', itemStyle: { color: '#f39c12' } },
-        { name: 'Final Products', itemStyle: { color: '#2ecc71' } },
-        { name: 'Documentation', itemStyle: { color: '#9b59b6' } },
-      ],
-    },
     onNodeClick: (nodeData, _params) => {
       console.log('Node clicked:', nodeData.name);
+      const connectivity = (nodeData as { _connectivity?: { incoming: unknown[]; outgoing: unknown[] } })._connectivity;
       alert(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        `Node: ${nodeData.name}\nConnections: ${(nodeData as any)._connectivity?.incoming.length || 0} in, ${(nodeData as any)._connectivity?.outgoing.length || 0} out`,
+        `Node: ${nodeData.name}\nConnections: ${connectivity?.incoming.length || 0} in, ${connectivity?.outgoing.length || 0} out`,
       );
     },
     onNodeDoubleClick: (nodeData, _params) => {
@@ -203,17 +258,27 @@ export const EnhancedManufacturingFlow: Story = {
   },
 };
 
-export const BranchCollapsingDemo: Story = {
-  name: 'Branch Collapsing & Manhattan Edges',
+export const EdgeStyleComparison: Story = {
+  name: 'Edge Style Comparison',
   args: {
+    data: edgeStyleData,
+    showEdgeLabels: true,
+    collapsible: false,
     width: 1000,
     height: 600,
-    layout: 'layered',
-    direction: 'LR',
-    draggable: true,
-    roam: true,
-    showEdgeLabels: false,
-    collapsible: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Use the Controls above to switch between different edge styles: straight, curved, and manhattan. This story demonstrates how the same data looks with different edge rendering styles.',
+      },
+    },
+  },
+};
+
+export const BranchCollapsing: Story = {
+  args: {
     data: {
       nodes: [
         // Source
@@ -260,20 +325,22 @@ export const BranchCollapsingDemo: Story = {
         { name: 'Terminals', itemStyle: { color: '#2ecc71' } },
       ],
     },
+    showEdgeLabels: false,
+    collapsible: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Double-click on any node to collapse/expand its downstream branch. This is useful for exploring complex workflows by hiding parts of the graph.',
+      },
+    },
   },
 };
 
 export const TopBottomLayout: Story = {
-  name: 'Top-to-Bottom with Edge Labels',
+  name: 'Top-to-Bottom Layout',
   args: {
-    width: 900,
-    height: 800,
-    layout: 'layered',
-    direction: 'TB',
-    draggable: true,
-    roam: true,
-    showEdgeLabels: true,
-    collapsible: true,
     data: {
       nodes: [
         // Level 0 - Suppliers (source nodes)
@@ -367,79 +434,15 @@ export const TopBottomLayout: Story = {
         { name: 'Distribution', itemStyle: { color: '#2ecc71' } },
       ],
     },
-  },
-};
-
-export const SmartLabelPositioning: Story = {
-  name: 'Smart Label Positioning Demo',
-  args: {
-    width: 1000,
-    height: 600,
-    layout: 'layered',
-    direction: 'LR',
-    draggable: true,
-    roam: true,
-    showEdgeLabels: false,
-    collapsible: false,
-    data: {
-      nodes: [
-        // Source nodes (left labels)
-        { id: 'input1', name: 'Input Source A', level: 0, category: 0, value: 25 },
-        { id: 'input2', name: 'Input Source B', level: 0, category: 0, value: 20 },
-
-        // Middle nodes with both incoming and outgoing (bottom labels)
-        { id: 'processor1', name: 'Processor 1', level: 1, category: 1, value: 35 },
-        { id: 'processor2', name: 'Processor 2', level: 1, category: 1, value: 30 },
-
-        // Another middle layer (bottom labels)
-        { id: 'aggregator', name: 'Aggregator', level: 2, category: 2, value: 65 },
-
-        // Terminal nodes (right labels)
-        { id: 'output1', name: 'Final Output A', level: 3, category: 3, value: 40 },
-        { id: 'output2', name: 'Final Output B', level: 3, category: 3, value: 25 },
-
-        // Isolated node (top label)
-        { id: 'isolated', name: 'Isolated Node', level: 1, category: 4, value: 10 },
-      ],
-      links: [
-        { source: 'input1', target: 'processor1', value: 12 },
-        { source: 'input1', target: 'processor2', value: 8 },
-        { source: 'input2', target: 'processor2', value: 15 },
-
-        { source: 'processor1', target: 'aggregator', value: 20 },
-        { source: 'processor2', target: 'aggregator', value: 18 },
-
-        { source: 'aggregator', target: 'output1', value: 25 },
-        { source: 'aggregator', target: 'output2', value: 15 },
-      ],
-      categories: [
-        { name: 'Inputs (Left Labels)', itemStyle: { color: '#3498db' } },
-        { name: 'Processors (Bottom Labels)', itemStyle: { color: '#e74c3c' } },
-        { name: 'Aggregators (Bottom Labels)', itemStyle: { color: '#f39c12' } },
-        { name: 'Outputs (Right Labels)', itemStyle: { color: '#2ecc71' } },
-        { name: 'Isolated (Top Labels)', itemStyle: { color: '#9b59b6' } },
-      ],
-    },
+    direction: 'TB',
+    height: 800,
+    showEdgeLabels: true,
   },
 };
 
 export const ForceDirectedLayout: Story = {
-  name: 'Force-Directed with Branch Highlighting',
+  name: 'Force-Directed Layout',
   args: {
-    width: 900,
-    height: 600,
-    layout: 'force',
-    draggable: true,
-    roam: true,
-    showEdgeLabels: true,
-    collapsible: true,
-    force: {
-      repulsion: 1200,
-      gravity: 0.1,
-      edgeLength: [80, 150],
-      friction: 0.6,
-      layoutAnimation: true,
-    },
     data: {
       nodes: [
         { id: 'core', name: 'Core System', value: 50, category: 0, description: 'Central processing hub' },
@@ -473,6 +476,15 @@ export const ForceDirectedLayout: Story = {
         { name: 'Outputs', itemStyle: { color: '#2ecc71' } },
       ],
     },
+    layout: 'force',
+    showEdgeLabels: true,
+    force: {
+      repulsion: 1200,
+      gravity: 0.1,
+      edgeLength: [80, 150],
+      friction: 0.6,
+      layoutAnimation: true,
+    },
     onNodeClick: (nodeData, _params) => {
       console.log('Force layout node clicked:', nodeData.name);
       alert(`Node: ${nodeData.name}\nHover over nodes/edges to see branch highlighting!`);
@@ -481,12 +493,9 @@ export const ForceDirectedLayout: Story = {
 };
 
 export const Loading: Story = {
+  name: 'Loading State',
   args: {
-    width: 800,
-    height: 500,
     loading: true,
-    showEdgeLabels: false,
-    collapsible: false,
     data: {
       nodes: [{ id: 'node1', name: 'Loading Node', value: 50, level: 0, category: 0 }],
       links: [],

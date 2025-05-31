@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from 'eslint-plugin-storybook';
+
 import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from '@typescript-eslint/eslint-plugin';
@@ -9,9 +12,7 @@ export default [
   // Ignore patterns (equivalent to ignorePatterns)
   {
     ignores: ['dist/**', '.eslintrc.cjs'],
-  },
-
-  // Node.js configuration for config files
+  }, // Node.js configuration for config files
   {
     files: ['vite.config.ts', '*.config.js', '*.config.ts'],
     languageOptions: {
@@ -19,9 +20,7 @@ export default [
         ...globals.node,
       },
     },
-  },
-
-  // Main configuration
+  }, // Main configuration
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
@@ -85,4 +84,5 @@ export default [
       'brace-style': ['error', '1tbs', { allowSingleLine: false }],
     },
   },
+  ...storybook.configs['flat/recommended'],
 ];

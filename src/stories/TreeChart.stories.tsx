@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TreeChart } from '../components/TreeChart';
 
 const meta = {
@@ -221,7 +221,6 @@ export const RadialLayout: Story = {
 };
 
 export const ExtendedFamilyTree: Story = {
-  name: 'Extended Family Tree',
   args: {
     width: 800,
     height: 700,

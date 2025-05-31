@@ -148,6 +148,11 @@ export interface TreeChartProps extends BaseEChartsProps {
 }
 
 /**
+ * Edge style types for DAG Chart
+ */
+export type EdgeStyle = 'straight' | 'curved' | 'manhattan';
+
+/**
  * DAG Chart props for manufacturing workflows with layered layout
  */
 export interface DAGChartProps extends BaseEChartsProps {
@@ -157,6 +162,8 @@ export interface DAGChartProps extends BaseEChartsProps {
   layout?: 'layered' | 'force';
   /** Flow direction for layered layout */
   direction?: 'LR' | 'TB';
+  /** Edge style - straight lines, smooth curves, or Manhattan (right-angled) */
+  edgeStyle?: EdgeStyle;
   /** Enable node dragging */
   draggable?: boolean;
   /** Enable zooming and panning */
