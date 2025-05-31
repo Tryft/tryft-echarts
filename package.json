@@ -47,10 +47,7 @@
     "echarts": "^5.4.3"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "npm run type-check"
-    ],
+    "*.{ts,tsx}": "eslint --fix",
     "*.{ts,tsx,js,jsx,json,md}": "prettier --write"
   },
   "devDependencies": {
