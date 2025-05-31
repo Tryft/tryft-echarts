@@ -36,42 +36,42 @@ pnpm add @tryft/echarts
 import { LineChart, BarChart, PieChart } from '@tryft/echarts';
 
 function App() {
-	return (
-		<div>
-			{/* Simple Line Chart */}
-			<LineChart
-				series={[
-					{
-						name: 'Sales',
-						data: [120, 200, 150, 80, 70, 110, 130],
-						type: 'line',
-					},
-				]}
-				categories={['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']}
-				height={400}
-			/>
+  return (
+    <div>
+      {/* Simple Line Chart */}
+      <LineChart
+        series={[
+          {
+            name: 'Sales',
+            data: [120, 200, 150, 80, 70, 110, 130],
+            type: 'line',
+          },
+        ]}
+        categories={['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']}
+        height={400}
+      />
 
-			{/* Simple Bar Chart */}
-			<BarChart
-				data={[
-					{ name: 'Product A', value: 100 },
-					{ name: 'Product B', value: 200 },
-					{ name: 'Product C', value: 150 },
-				]}
-				height={400}
-			/>
+      {/* Simple Bar Chart */}
+      <BarChart
+        data={[
+          { name: 'Product A', value: 100 },
+          { name: 'Product B', value: 200 },
+          { name: 'Product C', value: 150 },
+        ]}
+        height={400}
+      />
 
-			{/* Simple Pie Chart */}
-			<PieChart
-				data={[
-					{ name: 'Desktop', value: 1048 },
-					{ name: 'Mobile', value: 735 },
-					{ name: 'Tablet', value: 580 },
-				]}
-				height={400}
-			/>
-		</div>
-	);
+      {/* Simple Pie Chart */}
+      <PieChart
+        data={[
+          { name: 'Desktop', value: 1048 },
+          { name: 'Mobile', value: 735 },
+          { name: 'Tablet', value: 580 },
+        ]}
+        height={400}
+      />
+    </div>
+  );
 }
 ```
 
@@ -85,14 +85,14 @@ Perfect for showing trends over time.
 
 ```tsx
 <LineChart
-	series={[
-		{
-			name: 'Revenue',
-			data: [120, 200, 150, 80, 70, 110, 130],
-			type: 'line',
-		},
-	]}
-	categories={['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']}
+  series={[
+    {
+      name: 'Revenue',
+      data: [120, 200, 150, 80, 70, 110, 130],
+      type: 'line',
+    },
+  ]}
+  categories={['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']}
 />
 ```
 
@@ -102,12 +102,12 @@ Great for comparing values across categories.
 
 ```tsx
 <BarChart
-	data={[
-		{ name: 'Q1', value: 120 },
-		{ name: 'Q2', value: 200 },
-		{ name: 'Q3', value: 150 },
-		{ name: 'Q4', value: 300 },
-	]}
+  data={[
+    { name: 'Q1', value: 120 },
+    { name: 'Q2', value: 200 },
+    { name: 'Q3', value: 150 },
+    { name: 'Q4', value: 300 },
+  ]}
 />
 ```
 
@@ -117,12 +117,12 @@ Ideal for showing parts of a whole.
 
 ```tsx
 <PieChart
-	data={[
-		{ name: 'Chrome', value: 1048 },
-		{ name: 'Firefox', value: 735 },
-		{ name: 'Safari', value: 580 },
-		{ name: 'Edge', value: 484 },
-	]}
+  data={[
+    { name: 'Chrome', value: 1048 },
+    { name: 'Firefox', value: 735 },
+    { name: 'Safari', value: 580 },
+    { name: 'Edge', value: 484 },
+  ]}
 />
 ```
 
@@ -134,27 +134,27 @@ Perfect for hierarchical data with rich text labels.
 
 ```tsx
 <TreeChart
-	data={{
-		name: 'CEO',
-		value: 100,
-		children: [
-			{
-				name: 'CTO',
-				value: 80,
-				children: [
-					{ name: 'Frontend Team', value: 30 },
-					{ name: 'Backend Team', value: 50 },
-				],
-			},
-			{
-				name: 'CMO',
-				value: 70,
-				children: [{ name: 'Marketing Team', value: 40 }],
-			},
-		],
-	}}
-	layout="orthogonal"
-	orient="LR"
+  data={{
+    name: 'CEO',
+    value: 100,
+    children: [
+      {
+        name: 'CTO',
+        value: 80,
+        children: [
+          { name: 'Frontend Team', value: 30 },
+          { name: 'Backend Team', value: 50 },
+        ],
+      },
+      {
+        name: 'CMO',
+        value: 70,
+        children: [{ name: 'Marketing Team', value: 40 }],
+      },
+    ],
+  }}
+  layout="orthogonal"
+  orient="LR"
 />
 ```
 
@@ -164,25 +164,25 @@ Great for visualizing hierarchical data with size-based rectangles.
 
 ```tsx
 <TreemapChart
-	data={[
-		{
-			name: 'Technology',
-			value: 500,
-			children: [
-				{ name: 'Frontend', value: 200 },
-				{ name: 'Backend', value: 300 },
-			],
-		},
-		{
-			name: 'Design',
-			value: 300,
-			children: [
-				{ name: 'UI/UX', value: 150 },
-				{ name: 'Graphics', value: 150 },
-			],
-		},
-	]}
-	type="squarify"
+  data={[
+    {
+      name: 'Technology',
+      value: 500,
+      children: [
+        { name: 'Frontend', value: 200 },
+        { name: 'Backend', value: 300 },
+      ],
+    },
+    {
+      name: 'Design',
+      value: 300,
+      children: [
+        { name: 'UI/UX', value: 150 },
+        { name: 'Graphics', value: 150 },
+      ],
+    },
+  ]}
+  type="squarify"
 />
 ```
 
@@ -192,15 +192,15 @@ Perfect for showing progress or performance metrics.
 
 ```tsx
 <GaugeChart
-	data={[
-		{
-			name: 'Performance',
-			value: 75,
-		},
-	]}
-	min={0}
-	max={100}
-	radius="75%"
+  data={[
+    {
+      name: 'Performance',
+      value: 75,
+    },
+  ]}
+  min={0}
+  max={100}
+  radius="75%"
 />
 ```
 
@@ -210,17 +210,17 @@ Excellent for network visualization with rich node information.
 
 ```tsx
 <GraphChart
-	nodes={[
-		{ id: '1', name: 'Node 1', value: 10, category: 0 },
-		{ id: '2', name: 'Node 2', value: 20, category: 1 },
-		{ id: '3', name: 'Node 3', value: 15, category: 0 },
-	]}
-	links={[
-		{ source: '1', target: '2', value: 5 },
-		{ source: '2', target: '3', value: 3 },
-	]}
-	categories={[{ name: 'Type A' }, { name: 'Type B' }]}
-	layout="force"
+  nodes={[
+    { id: '1', name: 'Node 1', value: 10, category: 0 },
+    { id: '2', name: 'Node 2', value: 20, category: 1 },
+    { id: '3', name: 'Node 3', value: 15, category: 0 },
+  ]}
+  links={[
+    { source: '1', target: '2', value: 5 },
+    { source: '2', target: '3', value: 3 },
+  ]}
+  categories={[{ name: 'Type A' }, { name: 'Type B' }]}
+  layout="force"
 />
 ```
 
@@ -232,19 +232,19 @@ All components accept a custom `option` prop for advanced ECharts configuration:
 
 ```tsx
 <LineChart
-	option={{
-		title: { text: 'Custom Chart' },
-		grid: { left: '10%', right: '10%' },
-		xAxis: { type: 'category', data: ['A', 'B', 'C'] },
-		yAxis: { type: 'value' },
-		series: [
-			{
-				data: [120, 200, 150],
-				type: 'line',
-				smooth: true,
-			},
-		],
-	}}
+  option={{
+    title: { text: 'Custom Chart' },
+    grid: { left: '10%', right: '10%' },
+    xAxis: { type: 'category', data: ['A', 'B', 'C'] },
+    yAxis: { type: 'value' },
+    series: [
+      {
+        data: [120, 200, 150],
+        type: 'line',
+        smooth: true,
+      },
+    ],
+  }}
 />
 ```
 
@@ -254,11 +254,11 @@ Handle chart interactions with event callbacks:
 
 ```tsx
 <BarChart
-	data={data}
-	onEvents={{
-		click: (params) => console.log('Chart clicked:', params),
-		mouseover: (params) => console.log('Mouse over:', params),
-	}}
+  data={data}
+  onEvents={{
+    click: (params) => console.log('Chart clicked:', params),
+    mouseover: (params) => console.log('Mouse over:', params),
+  }}
 />
 ```
 
@@ -271,25 +271,20 @@ import { useRef } from 'react';
 import { LineChart, EChartsRef } from '@tryft/echarts';
 
 function MyComponent() {
-	const chartRef = useRef<EChartsRef>(null);
+  const chartRef = useRef<EChartsRef>(null);
 
-	const handleExport = () => {
-		const instance = chartRef.current?.getEchartsInstance();
-		if (instance) {
-			const dataURL = instance.getDataURL({
-				type: 'png',
-				backgroundColor: '#fff',
-			});
-			// Use dataURL for export
-		}
-	};
+  const handleExport = () => {
+    const instance = chartRef.current?.getEchartsInstance();
+    if (instance) {
+      const dataURL = instance.getDataURL({
+        type: 'png',
+        backgroundColor: '#fff',
+      });
+      // Use dataURL for export
+    }
+  };
 
-	return (
-		<LineChart
-			ref={chartRef}
-			data={data}
-		/>
-	);
+  return <LineChart ref={chartRef} data={data} />;
 }
 ```
 
@@ -405,18 +400,12 @@ src/
    import type { MyChartProps, EChartsRef } from '../types';
 
    export const MyChart = forwardRef<EChartsRef, MyChartProps>(({ data, option: customOption, ...props }, ref) => {
-   	const option = useMemo(() => {
-   		// Generate ECharts option from props
-   		return customOption || generatedOption;
-   	}, [data, customOption]);
+     const option = useMemo(() => {
+       // Generate ECharts option from props
+       return customOption || generatedOption;
+     }, [data, customOption]);
 
-   	return (
-   		<BaseEChart
-   			ref={ref}
-   			option={option}
-   			{...props}
-   		/>
-   	);
+     return <BaseEChart ref={ref} option={option} {...props} />;
    });
    ```
 
@@ -425,8 +414,8 @@ src/
    ```tsx
    // src/types/index.ts
    export interface MyChartProps extends BaseEChartsProps {
-   	data?: MyDataType[];
-   	// ... other props
+     data?: MyDataType[];
+     // ... other props
    }
    ```
 
@@ -445,8 +434,8 @@ src/
    import { MyChart } from '../components/MyChart';
 
    const meta: Meta<typeof MyChart> = {
-   	title: 'Charts/MyChart',
-   	component: MyChart,
+     title: 'Charts/MyChart',
+     component: MyChart,
    };
 
    export default meta;

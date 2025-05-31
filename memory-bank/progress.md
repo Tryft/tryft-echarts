@@ -248,16 +248,10 @@ The library has no known critical issues. All core functionality is working as e
 ```tsx
 // Proven pattern for new chart components
 export const NewChart = forwardRef<EChartsRef, NewChartProps>(
-	({ data, customProps, option: customOption, ...props }, ref) => {
-		const option = useMemo(() => generateOption(data, customProps), [deps]);
-		return (
-			<BaseEChart
-				ref={ref}
-				option={option}
-				{...props}
-			/>
-		);
-	},
+  ({ data, customProps, option: customOption, ...props }, ref) => {
+    const option = useMemo(() => generateOption(data, customProps), [deps]);
+    return <BaseEChart ref={ref} option={option} {...props} />;
+  },
 );
 ```
 

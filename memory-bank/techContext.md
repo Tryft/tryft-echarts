@@ -103,8 +103,8 @@ npm run build-storybook
 
 ```json
 {
-	"react": "^18.0.0",
-	"echarts": "^5.4.0"
+  "react": "^18.0.0",
+  "echarts": "^5.4.0"
 }
 ```
 
@@ -112,10 +112,10 @@ npm run build-storybook
 
 ```json
 {
-	"typescript": "^5.0.0",
-	"vite": "^5.0.0",
-	"@storybook/react": "^7.0.0",
-	"eslint": "^8.0.0"
+  "typescript": "^5.0.0",
+  "vite": "^5.0.0",
+  "@storybook/react": "^7.0.0",
+  "eslint": "^8.0.0"
 }
 ```
 
@@ -132,23 +132,23 @@ npm run build-storybook
 ```typescript
 // vite.config.ts
 export default defineConfig({
-	build: {
-		lib: {
-			entry: 'src/index.ts',
-			formats: ['es', 'umd'],
-			fileName: (format) => `index.${format}.js`,
-		},
-		rollupOptions: {
-			external: ['react', 'react-dom', 'echarts'],
-			output: {
-				globals: {
-					'react': 'React',
-					'react-dom': 'ReactDOM',
-					'echarts': 'echarts',
-				},
-			},
-		},
-	},
+  build: {
+    lib: {
+      entry: 'src/index.ts',
+      formats: ['es', 'umd'],
+      fileName: (format) => `index.${format}.js`,
+    },
+    rollupOptions: {
+      external: ['react', 'react-dom', 'echarts'],
+      output: {
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM',
+          echarts: 'echarts',
+        },
+      },
+    },
+  },
 });
 ```
 
@@ -156,17 +156,17 @@ export default defineConfig({
 
 ```json
 {
-	"compilerOptions": {
-		"strict": true,
-		"target": "ES2020",
-		"lib": ["ES2020", "DOM"],
-		"module": "ESNext",
-		"moduleResolution": "node",
-		"jsx": "react-jsx",
-		"declaration": true,
-		"declarationMap": true,
-		"sourceMap": true
-	}
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  }
 }
 ```
 

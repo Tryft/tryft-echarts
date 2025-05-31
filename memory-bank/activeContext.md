@@ -159,20 +159,14 @@ The core tryft/echarts library has been successfully implemented and is ready fo
 
 ```tsx
 export const ChartComponent = forwardRef<EChartsRef, ChartProps>(
-	({ data, customProps, option: customOption, ...props }, ref) => {
-		const option = useMemo(() => {
-			const generated = generateChartOption(data, customProps);
-			return customOption ? { ...generated, ...customOption } : generated;
-		}, [data, customProps, customOption]);
+  ({ data, customProps, option: customOption, ...props }, ref) => {
+    const option = useMemo(() => {
+      const generated = generateChartOption(data, customProps);
+      return customOption ? { ...generated, ...customOption } : generated;
+    }, [data, customProps, customOption]);
 
-		return (
-			<BaseEChart
-				ref={ref}
-				option={option}
-				{...props}
-			/>
-		);
-	},
+    return <BaseEChart ref={ref} option={option} {...props} />;
+  },
 );
 ```
 

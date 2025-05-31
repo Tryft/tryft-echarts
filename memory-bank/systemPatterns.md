@@ -66,23 +66,17 @@ export const BaseEChart = forwardRef<EChartsRef, BaseEChartsProps>(
 ```tsx
 // All specific charts follow this pattern
 export const SpecificChart = forwardRef<EChartsRef, SpecificChartProps>(
-	({ data, customProp, option: customOption, ...props }, ref) => {
-		const option = useMemo(() => {
-			// Generate ECharts option from simple props
-			const generatedOption = generateChartOption(data, customProp);
+  ({ data, customProp, option: customOption, ...props }, ref) => {
+    const option = useMemo(() => {
+      // Generate ECharts option from simple props
+      const generatedOption = generateChartOption(data, customProp);
 
-			// Allow custom option override
-			return customOption ? { ...generatedOption, ...customOption } : generatedOption;
-		}, [data, customProp, customOption]);
+      // Allow custom option override
+      return customOption ? { ...generatedOption, ...customOption } : generatedOption;
+    }, [data, customProp, customOption]);
 
-		return (
-			<BaseEChart
-				ref={ref}
-				option={option}
-				{...props}
-			/>
-		);
-	},
+    return <BaseEChart ref={ref} option={option} {...props} />;
+  },
 );
 ```
 
@@ -111,8 +105,8 @@ Consistent tooltip structure across all components:
 
 ```tsx
 tooltip: {
-	formatter: (params: any) => {
-		return `
+  formatter: (params: any) => {
+    return `
       <div style="padding: 8px 12px; line-height: 1.6;">
         <div style="font-size: 16px; font-weight: bold; color: #2c5aa0;">
           ${title}
@@ -123,7 +117,7 @@ tooltip: {
         </div>
       </div>
     `;
-	};
+  };
 }
 ```
 
@@ -132,17 +126,17 @@ tooltip: {
 ```tsx
 // Base interface for all charts
 interface BaseEChartsProps {
-	option?: EChartsOption;
-	width?: string | number;
-	height?: string | number;
-	// ... common props
+  option?: EChartsOption;
+  width?: string | number;
+  height?: string | number;
+  // ... common props
 }
 
 // Specific chart interfaces extend base
 interface LineChartProps extends BaseEChartsProps {
-	data?: LineData[];
-	series?: LineSeries[];
-	// ... specific props
+  data?: LineData[];
+  series?: LineSeries[];
+  // ... specific props
 }
 ```
 
@@ -150,8 +144,8 @@ interface LineChartProps extends BaseEChartsProps {
 
 ```tsx
 interface EChartsRef {
-	getEchartsInstance: () => ECharts | null;
-	refresh: () => void;
+  getEchartsInstance: () => ECharts | null;
+  refresh: () => void;
 }
 
 // Usage allows advanced operations
