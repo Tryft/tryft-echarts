@@ -89,8 +89,47 @@ export interface TreeNodeData {
   [key: string]: unknown;
 }
 
+/**
+ * DAG (Directed Acyclic Graph) node for manufacturing/production workflows
+ */
+export interface DAGNode {
+  id: string;
+  name: string;
+  value?: number;
+  description?: string;
+  category?: number;
+  level?: number; // For layer-based positioning
+  x?: number;
+  y?: number;
+  symbolSize?: number;
+  draggable?: boolean;
+}
+
+/**
+ * DAG link/edge for manufacturing/production relationships
+ */
+export interface DAGLink {
+  source: string;
+  target: string;
+  value?: number;
+  lineStyle?: {
+    color?: string;
+    width?: number;
+    type?: 'solid' | 'dashed' | 'dotted';
+  };
+}
+
+/**
+ * DAG data structure for complex manufacturing/production relationships
+ */
+export interface DAGData {
+  nodes: DAGNode[];
+  links: DAGLink[];
+  categories?: { name: string; itemStyle?: { color?: string } }[];
+}
+
 export interface TreeChartProps extends BaseEChartsProps {
-  /** Data for the tree chart - can be single node or array for multiple root nodes */
+  /** Data for the tree chart - can be tree structure or array for multiple root nodes */
   data?: TreeNodeData | TreeNodeData[];
   /** Tree layout orientation */
   layout?: 'orthogonal' | 'radial';
@@ -102,6 +141,36 @@ export interface TreeChartProps extends BaseEChartsProps {
   symbolSize?: number | number[];
   /** Callback when a node is clicked (called after expansion animation) */
   onNodeClick?: (nodeData: TreeNodeData, params: unknown) => void;
+}
+
+/**
+ * DAG Chart props for manufacturing workflows with layered layout
+ */
+export interface DAGChartProps extends BaseEChartsProps {
+  /** DAG data structure with nodes and links */
+  data: DAGData;
+  /** Layout algorithm - 'layered' positions nodes by level, 'force' uses physics simulation */
+  layout?: 'layered' | 'force';
+  /** Flow direction for layered layout */
+  direction?: 'LR' | 'TB';
+  /** Enable node dragging */
+  draggable?: boolean;
+  /** Enable zooming and panning */
+  roam?: boolean;
+  /** Callback when a node is clicked */
+  onNodeClick?: (nodeData: DAGNode, params: unknown) => void;
+  /** Callback when an edge is clicked */
+  onEdgeClick?: (linkData: DAGLink, params: unknown) => void;
+  /** Callback when a node is dragged */
+  onNodeDrag?: (nodeData: DAGNode, position: [number, number]) => void;
+  /** Force layout options (when layout='force') */
+  force?: {
+    repulsion?: number;
+    gravity?: number;
+    edgeLength?: number | [number, number];
+    friction?: number;
+    layoutAnimation?: boolean;
+  };
 }
 
 export interface TreemapChartProps extends BaseEChartsProps {

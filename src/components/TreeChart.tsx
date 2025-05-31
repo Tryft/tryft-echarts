@@ -109,7 +109,7 @@ export const TreeChart = forwardRef<EChartsRef, TreeChartProps>(
         series: [
           {
             type: 'tree',
-            data: Array.isArray(data) ? data : [data || {}],
+            data: Array.isArray(data) ? (data as TreeNodeData[]) : [(data as TreeNodeData) || {}],
             top: '80px',
             left: '7%',
             bottom: '20px',

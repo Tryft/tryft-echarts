@@ -3,6 +3,7 @@ export { LineChart } from '@/components/LineChart';
 export { BarChart } from '@/components/BarChart';
 export { PieChart } from '@/components/PieChart';
 export { TreeChart } from '@/components/TreeChart';
+export { DAGChart } from '@/components/DAGChart';
 export { TreemapChart } from '@/components/TreemapChart';
 export { GaugeChart } from '@/components/GaugeChart';
 export { GraphChart } from '@/components/GraphChart';
