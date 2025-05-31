@@ -55,10 +55,11 @@ export const GaugeChart = forwardRef<EChartsRef, GaugeChartProps>(
 					textStyle: {
 						color: '#333',
 					},
-					formatter: (params: any) => {
-						const { data } = params;
+					formatter: (params: unknown) => {
+						const typedParams = params as { data?: { name?: string; value?: number } };
+						const data = typedParams.data || { name: 'Unknown', value: 0 };
 						const name = data.name || 'Unknown';
-						const value = data.value !== undefined ? data.value : 'N/A';
+						const value = typeof data.value === 'number' ? data.value : 0;
 						const percentage = max > 0 ? ((value / max) * 100).toFixed(1) : '0';
 
 						return `

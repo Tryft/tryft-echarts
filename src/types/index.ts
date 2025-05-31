@@ -19,7 +19,7 @@ export interface BaseEChartsProps {
 	/** Callback when chart is ready */
 	onChartReady?: (instance: ECharts) => void;
 	/** Callback when chart events occur */
-	onEvents?: Record<string, (params: any) => void>;
+	onEvents?: Record<string, (params: unknown) => void>;
 	/** Additional style for the container */
 	style?: React.CSSProperties;
 	/** Additional class name for the container */
@@ -86,7 +86,7 @@ export interface TreeNodeData {
 	value?: number;
 	children?: TreeNodeData[];
 	description?: string;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 export interface TreeChartProps extends BaseEChartsProps {
@@ -108,7 +108,7 @@ export interface TreemapChartProps extends BaseEChartsProps {
 		name: string;
 		value: number;
 		children?: TreemapChartProps['data'];
-		[key: string]: any;
+		[key: string]: unknown;
 	}>;
 	/** Treemap layout algorithm */
 	type?: 'binary' | 'dice' | 'slice' | 'sliceDice' | 'squarify';
@@ -141,14 +141,14 @@ export interface GraphChartProps extends BaseEChartsProps {
 		name: string;
 		value?: number;
 		category?: number;
-		[key: string]: any;
+		[key: string]: unknown;
 	}>;
 	/** Links/edges data */
 	links?: Array<{
 		source: string;
 		target: string;
 		value?: number;
-		[key: string]: any;
+		[key: string]: unknown;
 	}>;
 	/** Categories for node grouping */
 	categories?: Array<{

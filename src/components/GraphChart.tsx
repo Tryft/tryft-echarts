@@ -67,16 +67,26 @@ export const GraphChart = forwardRef<EChartsRef, GraphChartProps>(
 					textStyle: {
 						color: '#333',
 					},
-					formatter: (params: any) => {
-						const { data, dataType } = params;
+					formatter: (params: unknown) => {
+						const typedParams = params as { data?: unknown; dataType?: string };
+						const { data, dataType } = typedParams;
 
 						if (dataType === 'node') {
-							const name = data.name || 'Unknown';
-							const value = data.value !== undefined ? data.value : 'N/A';
+							const nodeData = data as {
+								name?: string;
+								value?: number;
+								category?: number;
+								id?: string;
+								description?: string;
+							};
+							const name = nodeData.name || 'Unknown';
+							const value = nodeData.value !== undefined ? nodeData.value : 'N/A';
 							const category =
-								data.category !== undefined && categories?.[data.category] ? categories[data.category].name : 'N/A';
+								nodeData.category !== undefined && categories?.[nodeData.category]
+									? categories[nodeData.category].name
+									: 'N/A';
 							const connections =
-								links?.filter((link) => link.source === data.id || link.target === data.id).length || 0;
+								links?.filter((link) => link.source === nodeData.id || link.target === nodeData.id).length || 0;
 
 							return `
 								<div style="padding: 10px 14px; line-height: 1.6;">
@@ -96,11 +106,11 @@ export const GraphChart = forwardRef<EChartsRef, GraphChartProps>(
 										<span style="font-size: 14px; font-weight: 600; color: #762a83; margin-left: 10px;">${connections}</span>
 									</div>
 									${
-										data.description
+										nodeData.description
 											? `
 										<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0;">
 											<span style="font-size: 11px; color: #999; font-weight: normal; text-transform: uppercase;">DESCRIPTION:</span>
-											<div style="font-size: 13px; color: #555; margin-top: 4px; font-style: italic; line-height: 1.4;">${data.description}</div>
+											<div style="font-size: 13px; color: #555; margin-top: 4px; font-style: italic; line-height: 1.4;">${nodeData.description}</div>
 										</div>
 									`
 											: ''
@@ -108,9 +118,10 @@ export const GraphChart = forwardRef<EChartsRef, GraphChartProps>(
 								</div>
 							`;
 						} else if (dataType === 'edge') {
-							const sourceName = nodes?.find((n) => n.id === data.source)?.name || data.source;
-							const targetName = nodes?.find((n) => n.id === data.target)?.name || data.target;
-							const value = data.value !== undefined ? data.value : 'N/A';
+							const edgeData = data as { source?: string; target?: string; value?: number };
+							const sourceName = nodes?.find((n) => n.id === edgeData.source)?.name || edgeData.source;
+							const targetName = nodes?.find((n) => n.id === edgeData.target)?.name || edgeData.target;
+							const value = edgeData.value !== undefined ? edgeData.value : 'N/A';
 
 							return `
 								<div style="padding: 8px 12px; line-height: 1.6;">
@@ -165,8 +176,9 @@ export const GraphChart = forwardRef<EChartsRef, GraphChartProps>(
 						label: {
 							show: true,
 							position: 'right',
-							formatter: (params: any) => {
-								const { data } = params;
+							formatter: (params: unknown) => {
+								const typedParams = params as { data?: { name?: string; value?: number } };
+								const data = typedParams.data || { name: 'Unknown', value: 0 };
 								const name = data.name || '';
 								const value = data.value !== undefined ? data.value : '';
 

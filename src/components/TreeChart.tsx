@@ -64,8 +64,11 @@ export const TreeChart = forwardRef<EChartsRef, TreeChartProps>(
 					textStyle: {
 						color: '#333',
 					},
-					formatter: (params: any) => {
-						const { data } = params;
+					formatter: (params: unknown) => {
+						const typedParams = params as {
+							data?: { name?: string; value?: number; depth?: number; children?: unknown[]; description?: string };
+						};
+						const data = typedParams.data || {};
 						const name = data.name || 'Unknown';
 						const value = data.value !== undefined ? data.value : 'N/A';
 						const level = data.depth !== undefined ? data.depth : 'N/A';
@@ -122,8 +125,9 @@ export const TreeChart = forwardRef<EChartsRef, TreeChartProps>(
 							fontSize: 12,
 							fontWeight: 'normal',
 							color: '#333',
-							formatter: (params: any) => {
-								const { data } = params;
+							formatter: (params: unknown) => {
+								const typedParams = params as { data?: { name?: string; value?: number } };
+								const data = typedParams.data || {};
 								const name = data.name || '';
 								const value = data.value !== undefined ? data.value : '';
 
@@ -150,8 +154,9 @@ export const TreeChart = forwardRef<EChartsRef, TreeChartProps>(
 								position: orient === 'LR' ? 'right' : orient === 'RL' ? 'left' : orient === 'TB' ? 'bottom' : 'top',
 								verticalAlign: 'middle',
 								align: orient === 'LR' ? 'left' : orient === 'RL' ? 'right' : 'center',
-								formatter: (params: any) => {
-									const { data } = params;
+								formatter: (params: unknown) => {
+									const typedParams = params as { data?: { name?: string; value?: number } };
+									const data = typedParams.data || {};
 									const name = data.name || '';
 									const value = data.value !== undefined ? data.value : '';
 

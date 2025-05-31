@@ -52,11 +52,15 @@ export const TreemapChart = forwardRef<EChartsRef, TreemapChartProps>(
 					textStyle: {
 						color: '#333',
 					},
-					formatter: (params: any) => {
-						const { data } = params;
+					formatter: (params: unknown) => {
+						const typedParams = params as {
+							data?: { name?: string; value?: number; description?: string };
+							percent?: number;
+						};
+						const data = typedParams.data || {};
 						const name = data.name || 'Unknown';
 						const value = data.value !== undefined ? data.value : 'N/A';
-						const percentage = params.percent ? `${params.percent}%` : 'N/A';
+						const percentage = typedParams.percent ? `${typedParams.percent}%` : 'N/A';
 
 						return `
 							<div style="padding: 8px 12px; line-height: 1.6;">
@@ -114,8 +118,9 @@ export const TreemapChart = forwardRef<EChartsRef, TreemapChartProps>(
 						leafDepth: 2,
 						label: {
 							show: true,
-							formatter: (params: any) => {
-								const { data } = params;
+							formatter: (params: unknown) => {
+								const typedParams = params as { data?: { name?: string; value?: number } };
+								const data = typedParams.data || {};
 								const name = data.name || '';
 								const value = data.value !== undefined ? data.value : '';
 
@@ -144,8 +149,9 @@ export const TreemapChart = forwardRef<EChartsRef, TreemapChartProps>(
 						upperLabel: {
 							show: true,
 							height: 30,
-							formatter: (params: any) => {
-								const { data } = params;
+							formatter: (params: unknown) => {
+								const typedParams = params as { data?: { name?: string } };
+								const data = typedParams.data || {};
 								const name = data.name || '';
 								return `{upperTitle|${name}}`;
 							},

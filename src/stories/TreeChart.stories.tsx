@@ -211,7 +211,7 @@ export const InteractiveTree: Story = {
 		layout: 'orthogonal',
 		orient: 'LR',
 		onEvents: {
-			click: (params: any) => console.log('Node clicked:', params),
+			click: (params: unknown) => console.log('Node clicked:', params),
 		},
 	},
 };
