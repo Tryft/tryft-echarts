@@ -103,6 +103,8 @@ export interface DAGNode {
   y?: number;
   symbolSize?: number;
   draggable?: boolean;
+  collapsed?: boolean; // For branch collapsing
+  hidden?: boolean; // For hiding collapsed branches
 }
 
 /**
@@ -112,11 +114,13 @@ export interface DAGLink {
   source: string;
   target: string;
   value?: number;
+  label?: string; // Label text for the edge
   lineStyle?: {
     color?: string;
     width?: number;
     type?: 'solid' | 'dashed' | 'dotted';
   };
+  hidden?: boolean; // For hiding collapsed branches
 }
 
 /**
@@ -157,12 +161,18 @@ export interface DAGChartProps extends BaseEChartsProps {
   draggable?: boolean;
   /** Enable zooming and panning */
   roam?: boolean;
+  /** Show edge labels */
+  showEdgeLabels?: boolean;
+  /** Enable branch collapsing on double-click */
+  collapsible?: boolean;
   /** Callback when a node is clicked */
   onNodeClick?: (nodeData: DAGNode, params: unknown) => void;
+  /** Callback when a node is double-clicked */
+  onNodeDoubleClick?: (nodeData: DAGNode, params: unknown) => void;
   /** Callback when an edge is clicked */
   onEdgeClick?: (linkData: DAGLink, params: unknown) => void;
-  /** Callback when a node is dragged */
-  onNodeDrag?: (nodeData: DAGNode, position: [number, number]) => void;
+  /** Callback when a node is dragged (unused) */
+  _onNodeDrag?: (nodeData: DAGNode, position: [number, number]) => void;
   /** Force layout options (when layout='force') */
   force?: {
     repulsion?: number;
