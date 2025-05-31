@@ -1,0 +1,283 @@
+name: Bundle Size Tracking
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  bundle-size:
+    name: Bundle Size Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build bundle
+        run: npm run build
+
+      - name: Calculate current bundle sizes
+        id: current-size
+        run: |
+          # Install jq for JSON processing
+          sudo apt-get update && sudo apt-get install -y jq bc
+
+          # Create bundle analysis
+          echo "{}" > bundle-sizes.json
+
+          if [ -f "dist/index.esm.js" ]; then
+            ESM_SIZE=$(stat -c%s "dist/index.esm.js")
+            ESM_SIZE_KB=$(echo "scale=2; $ESM_SIZE / 1024" | bc)
+            ESM_GZIP=$(gzip -c "dist/index.esm.js" | wc -c)
+            ESM_GZIP_KB=$(echo "scale=2; $ESM_GZIP / 1024" | bc)
+            
+            echo "esm_size_bytes=$ESM_SIZE" >> $GITHUB_OUTPUT
+            echo "esm_size_kb=$ESM_SIZE_KB" >> $GITHUB_OUTPUT
+            echo "esm_gzip_kb=$ESM_GZIP_KB" >> $GITHUB_OUTPUT
+            
+            jq --arg size "$ESM_SIZE" --arg sizeKb "$ESM_SIZE_KB" --arg gzipKb "$ESM_GZIP_KB" \
+               '.esm = {size: ($size | tonumber), sizeKb: ($sizeKb | tonumber), gzipKb: ($gzipKb | tonumber)}' \
+               bundle-sizes.json > temp.json && mv temp.json bundle-sizes.json
+          fi
+
+          if [ -f "dist/index.umd.js" ]; then
+            UMD_SIZE=$(stat -c%s "dist/index.umd.js")
+            UMD_SIZE_KB=$(echo "scale=2; $UMD_SIZE / 1024" | bc)
+            UMD_GZIP=$(gzip -c "dist/index.umd.js" | wc -c)
+            UMD_GZIP_KB=$(echo "scale=2; $UMD_GZIP / 1024" | bc)
+            
+            echo "umd_size_bytes=$UMD_SIZE" >> $GITHUB_OUTPUT
+            echo "umd_size_kb=$UMD_SIZE_KB" >> $GITHUB_OUTPUT
+            echo "umd_gzip_kb=$UMD_GZIP_KB" >> $GITHUB_OUTPUT
+            
+            jq --arg size "$UMD_SIZE" --arg sizeKb "$UMD_SIZE_KB" --arg gzipKb "$UMD_GZIP_KB" \
+               '.umd = {size: ($size | tonumber), sizeKb: ($sizeKb | tonumber), gzipKb: ($gzipKb | tonumber)}' \
+               bundle-sizes.json > temp.json && mv temp.json bundle-sizes.json
+          fi
+
+          # Set primary size for badge (ESM gzipped)
+          echo "primary_size_kb=$ESM_GZIP_KB" >> $GITHUB_OUTPUT
+
+      - name: Get previous bundle sizes (for comparison)
+        id: previous-size
+        run: |
+          # Try to get the previous bundle sizes from the main branch
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git checkout origin/main -- bundle-sizes.json 2>/dev/null || echo '{}' > previous-bundle-sizes.json
+            if [ -f "bundle-sizes.json" ]; then
+              cp bundle-sizes.json previous-bundle-sizes.json
+            fi
+            git checkout ${{ github.head_ref }} -- bundle-sizes.json 2>/dev/null || true
+          else
+            # For main branch, try to get from previous commit
+            git show HEAD~1:bundle-sizes.json > previous-bundle-sizes.json 2>/dev/null || echo '{}' > previous-bundle-sizes.json
+          fi
+
+          # Extract previous sizes
+          PREV_ESM_GZIP=$(jq -r '.esm.gzipKb // 0' previous-bundle-sizes.json)
+          PREV_UMD_GZIP=$(jq -r '.umd.gzipKb // 0' previous-bundle-sizes.json)
+
+          echo "prev_esm_gzip_kb=$PREV_ESM_GZIP" >> $GITHUB_OUTPUT
+          echo "prev_umd_gzip_kb=$PREV_UMD_GZIP" >> $GITHUB_OUTPUT
+
+      - name: Calculate size changes
+        id: size-diff
+        run: |
+          # Calculate differences
+          CURRENT_ESM="${{ steps.current-size.outputs.esm_gzip_kb }}"
+          PREVIOUS_ESM="${{ steps.previous-size.outputs.prev_esm_gzip_kb }}"
+
+          if [ "$PREVIOUS_ESM" != "0" ] && [ "$PREVIOUS_ESM" != "null" ]; then
+            ESM_DIFF=$(echo "scale=2; $CURRENT_ESM - $PREVIOUS_ESM" | bc)
+            ESM_PERCENT=$(echo "scale=2; ($ESM_DIFF / $PREVIOUS_ESM) * 100" | bc)
+            echo "esm_diff_kb=$ESM_DIFF" >> $GITHUB_OUTPUT
+            echo "esm_diff_percent=$ESM_PERCENT" >> $GITHUB_OUTPUT
+            
+            if (( $(echo "$ESM_DIFF > 0" | bc -l) )); then
+              echo "esm_trend=📈" >> $GITHUB_OUTPUT
+              echo "esm_change_text=+${ESM_DIFF}KB (+${ESM_PERCENT}%)" >> $GITHUB_OUTPUT
+            elif (( $(echo "$ESM_DIFF < 0" | bc -l) )); then
+              echo "esm_trend=📉" >> $GITHUB_OUTPUT
+              echo "esm_change_text=${ESM_DIFF}KB (${ESM_PERCENT}%)" >> $GITHUB_OUTPUT
+            else
+              echo "esm_trend=➡️" >> $GITHUB_OUTPUT
+              echo "esm_change_text=No change" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "esm_trend=🆕" >> $GITHUB_OUTPUT
+            echo "esm_change_text=New bundle" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create bundle size report
+        run: |
+          cat << 'EOF' > bundle-size-report.md
+          ## 📦 Bundle Size Report
+
+          | Format | Size | Gzipped | Change |
+          |--------|------|---------|--------|
+          | ESM | ${{ steps.current-size.outputs.esm_size_kb }} KB | ${{ steps.current-size.outputs.esm_gzip_kb }} KB | ${{ steps.size-diff.outputs.esm_trend }} ${{ steps.size-diff.outputs.esm_change_text }} |
+          | UMD | ${{ steps.current-size.outputs.umd_size_kb }} KB | ${{ steps.current-size.outputs.umd_gzip_kb }} KB | - |
+
+          ### Details
+          - **ESM Bundle**: Modern ES modules format, tree-shakable
+          - **UMD Bundle**: Universal module definition, compatible with CommonJS, AMD, and global variables
+          - **Gzipped sizes** represent what users actually download
+
+          ### Size Guidelines
+          - 🟢 **Good**: < 100 KB gzipped
+          - 🟡 **Warning**: 100-500 KB gzipped  
+          - 🔴 **Large**: > 500 KB gzipped
+
+          *Bundle sizes are automatically tracked on every commit to main.*
+          EOF
+
+      - name: Comment on PR (if this is a PR)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('bundle-size-report.md', 'utf8');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+      - name: Update README with bundle size badge
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Create bundle size badge URL
+          SIZE="${{ steps.current-size.outputs.primary_size_kb }}"
+
+          # Determine badge color based on size
+          if (( $(echo "$SIZE < 100" | bc -l) )); then
+            COLOR="brightgreen"
+          elif (( $(echo "$SIZE < 500" | bc -l) )); then
+            COLOR="yellow"
+          else
+            COLOR="red"
+          fi
+
+          BADGE_URL="https://img.shields.io/badge/bundle%20size-${SIZE}KB%20gzipped-${COLOR}?style=flat-square"
+          echo "Badge URL: $BADGE_URL"
+
+          # Update README.md with the badge
+          if grep -q "bundle%20size" README.md; then
+            # Replace existing badge
+            sed -i "s|https://img.shields.io/badge/bundle%20size-[^)]*|$BADGE_URL|g" README.md
+          else
+            # Add badge after the first heading
+            sed -i '1,/^# / {
+              /^# / a\
+          \
+          ![Bundle Size]('"$BADGE_URL"')
+            }' README.md
+          fi
+
+      - name: Commit bundle size data and README update
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Commit bundle sizes data
+          git add bundle-sizes.json
+          git add README.md
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "📦 Update bundle size data and badge [skip ci]"
+            git push
+          fi
+
+      - name: Upload bundle size artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-size-data
+          path: |
+            bundle-sizes.json
+            bundle-size-report.md
+
+  size-limit-check:
+    name: Size Limit Check
+    runs-on: ubuntu-latest
+    needs: bundle-size
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Download bundle size data
+        uses: actions/download-artifact@v4
+        with:
+          name: bundle-size-data
+
+      - name: Check size limits
+        run: |
+          # Define size limits (in KB, gzipped)
+          ESM_LIMIT=500
+          UMD_LIMIT=600
+
+          CURRENT_ESM=$(jq -r '.esm.gzipKb // 0' bundle-sizes.json)
+          CURRENT_UMD=$(jq -r '.umd.gzipKb // 0' bundle-sizes.json)
+
+          echo "## 🚦 Bundle Size Limit Check" > size-limit-check.md
+          echo "" >> size-limit-check.md
+
+          # Check ESM limit
+          if (( $(echo "$CURRENT_ESM > $ESM_LIMIT" | bc -l) )); then
+            echo "❌ **ESM Bundle**: ${CURRENT_ESM}KB exceeds limit of ${ESM_LIMIT}KB" >> size-limit-check.md
+            echo "ESM_LIMIT_EXCEEDED=true" >> $GITHUB_ENV
+          else
+            echo "✅ **ESM Bundle**: ${CURRENT_ESM}KB is within limit of ${ESM_LIMIT}KB" >> size-limit-check.md
+          fi
+
+          # Check UMD limit
+          if (( $(echo "$CURRENT_UMD > $UMD_LIMIT" | bc -l) )); then
+            echo "❌ **UMD Bundle**: ${CURRENT_UMD}KB exceeds limit of ${UMD_LIMIT}KB" >> size-limit-check.md
+            echo "UMD_LIMIT_EXCEEDED=true" >> $GITHUB_ENV
+          else
+            echo "✅ **UMD Bundle**: ${CURRENT_UMD}KB is within limit of ${UMD_LIMIT}KB" >> size-limit-check.md
+          fi
+
+          echo "" >> size-limit-check.md
+          echo "*These limits help maintain reasonable bundle sizes for end users.*" >> size-limit-check.md
+
+      - name: Comment size limit check on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('size-limit-check.md', 'utf8');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+      - name: Fail if size limits exceeded
+        if: env.ESM_LIMIT_EXCEEDED == 'true' || env.UMD_LIMIT_EXCEEDED == 'true'
+        run: |
+          echo "::error::Bundle size limits exceeded. Please optimize your bundle or increase the limits in the workflow."
+          exit 1

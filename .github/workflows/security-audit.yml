@@ -1,0 +1,176 @@
+name: Security Audit
+
+on:
+  schedule:
+    # Run security audit daily at 6 AM UTC
+    - cron: '0 6 * * *'
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: |
+          echo "## Security Audit Report" > security-audit-report.md
+          echo "" >> security-audit-report.md
+          echo "Generated on: $(date)" >> security-audit-report.md
+          echo "" >> security-audit-report.md
+          echo "### Summary" >> security-audit-report.md
+          npm audit --audit-level=info --json > audit-raw.json || true
+
+          # Parse audit results
+          if [ -f "audit-raw.json" ]; then
+            # Extract summary information
+            VULNERABILITIES=$(cat audit-raw.json | jq -r '.metadata.vulnerabilities | to_entries[] | "\(.key): \(.value)"' 2>/dev/null || echo "No vulnerabilities data")
+            DEPENDENCIES=$(cat audit-raw.json | jq -r '.metadata.dependencies // 0' 2>/dev/null || echo "Unknown")
+            DEV_DEPENDENCIES=$(cat audit-raw.json | jq -r '.metadata.devDependencies // 0' 2>/dev/null || echo "Unknown")
+            
+            echo "- Total dependencies: $DEPENDENCIES" >> security-audit-report.md
+            echo "- Development dependencies: $DEV_DEPENDENCIES" >> security-audit-report.md
+            echo "" >> security-audit-report.md
+            echo "### Vulnerabilities" >> security-audit-report.md
+            echo '```' >> security-audit-report.md
+            echo "$VULNERABILITIES" >> security-audit-report.md
+            echo '```' >> security-audit-report.md
+            echo "" >> security-audit-report.md
+          fi
+
+          echo "### Detailed Audit Output" >> security-audit-report.md
+          echo '```' >> security-audit-report.md
+          npm audit --audit-level=info >> security-audit-report.md 2>&1 || echo "Audit completed with findings" >> security-audit-report.md
+          echo '```' >> security-audit-report.md
+
+      - name: Run npm audit fix (dry run)
+        run: |
+          echo "" >> security-audit-report.md
+          echo "### Potential Fixes" >> security-audit-report.md
+          echo '```' >> security-audit-report.md
+          npm audit fix --dry-run >> security-audit-report.md 2>&1 || echo "No automatic fixes available" >> security-audit-report.md
+          echo '```' >> security-audit-report.md
+        continue-on-error: true
+
+      - name: Check for high/critical vulnerabilities
+        id: check-vulnerabilities
+        run: |
+          # Check if there are high or critical vulnerabilities
+          HIGH_CRIT=$(npm audit --audit-level=high --json 2>/dev/null | jq -r '.metadata.vulnerabilities.high // 0 + .metadata.vulnerabilities.critical // 0' || echo "0")
+          echo "high_critical_count=$HIGH_CRIT" >> $GITHUB_OUTPUT
+
+          if [ "$HIGH_CRIT" -gt 0 ]; then
+            echo "SECURITY_ALERT=true" >> $GITHUB_OUTPUT
+          else
+            echo "SECURITY_ALERT=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload security audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: security-audit-report.md
+
+      - name: Create security issue (if high/critical vulnerabilities found)
+        if: steps.check-vulnerabilities.outputs.SECURITY_ALERT == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('security-audit-report.md', 'utf8');
+            const vulnerabilityCount = '${{ steps.check-vulnerabilities.outputs.high_critical_count }}';
+
+            const title = `🚨 Security Alert: ${vulnerabilityCount} High/Critical Vulnerabilities Found`;
+
+            const body = `${title}
+
+            This issue was automatically created because high or critical security vulnerabilities were detected in the project dependencies.
+
+            ## Immediate Actions Required
+            1. Review the security audit report below
+            2. Update vulnerable dependencies
+            3. Test the application after updates
+            4. Close this issue once vulnerabilities are resolved
+
+            ## Security Audit Report
+            ${report}
+
+            ---
+            *This issue was automatically created by the Security Audit workflow.*
+            *Please address these vulnerabilities as soon as possible.*`;
+
+            // Check if a similar issue already exists
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'security,vulnerability'
+            });
+
+            const hasOpenSecurityIssue = existingIssues.data.some(issue => 
+              issue.title.includes('Security Alert') || issue.title.includes('Vulnerabilities')
+            );
+
+            if (!hasOpenSecurityIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['security', 'vulnerability', 'high-priority']
+              });
+            }
+
+      - name: Comment on PR (if this is a PR)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('security-audit-report.md', 'utf8');
+            const isSecurityAlert = '${{ steps.check-vulnerabilities.outputs.SECURITY_ALERT }}';
+
+            const alertEmoji = isSecurityAlert === 'true' ? '🚨' : '✅';
+            const alertText = isSecurityAlert === 'true' ? 'Security vulnerabilities detected!' : 'No high/critical vulnerabilities found';
+
+            const body = `## ${alertEmoji} Security Audit Results
+
+            ${alertText}
+
+            <details>
+            <summary>📋 View Full Security Audit Report</summary>
+
+            ${report}
+
+            </details>
+
+            ---
+            *This comment was automatically generated by the Security Audit workflow.*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
