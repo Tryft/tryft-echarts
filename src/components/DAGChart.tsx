@@ -506,7 +506,6 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
       customOption,
       calculateLayeredPositions,
       processedData,
-      collapsedNodes,
       showEdgeLabels,
       getNodeConnectivity,
       calculateLabelPosition,

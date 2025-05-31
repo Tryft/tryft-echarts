@@ -259,7 +259,6 @@ export const Default: Story = {
 };
 
 export const EdgeStyleComparison: Story = {
-  name: 'Edge Style Comparison',
   args: {
     data: edgeStyleData,
     showEdgeLabels: true,
