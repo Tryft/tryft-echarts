@@ -84,9 +84,13 @@ export interface PieChartProps extends BaseEChartsProps {
 export interface TreeNodeData {
   name: string;
   value?: number;
-  children?: TreeNodeData[];
   description?: string;
-  [key: string]: unknown;
+  children?: string[];
+  collapsed?: boolean;
+  x?: number;
+  y?: number;
+  fx?: number | null;
+  fy?: number | null;
 }
 
 /**
@@ -101,6 +105,8 @@ export interface DAGNode {
   level?: number; // For layer-based positioning
   x?: number;
   y?: number;
+  fx?: number | null;
+  fy?: number | null;
   symbolSize?: number;
   draggable?: boolean;
   collapsed?: boolean; // For branch collapsing
@@ -269,4 +275,69 @@ export interface EChartsRef {
   getEchartsInstance: () => ECharts | null;
   /** Refresh the chart */
   refresh: () => void;
+}
+
+/**
+ * Interfaces for D3DAGChart component using D3.js
+ */
+
+export interface D3DAGNode {
+  id: string;
+  name: string;
+  value?: number;
+  level?: number;
+  category?: string;
+  x?: number;
+  y?: number;
+  // Internal properties
+  fx?: number;
+  fy?: number;
+  index?: number;
+  collapsed?: boolean;
+  descendantCount?: number;
+  originalChildren?: string[];
+  vx?: number;
+  vy?: number;
+}
+
+export interface D3DAGLink {
+  source: string; // Can be a node or ID
+  target: string; // Can be a node or ID
+  value?: number;
+  label?: string;
+  lineStyle?: { color?: string; width?: number; type?: string };
+  // Internal properties
+  hidden?: boolean;
+}
+
+export interface D3DAGCategory {
+  name: string;
+  itemStyle: { color: string };
+}
+
+export interface D3DAGData {
+  nodes: D3DAGNode[];
+  links: D3DAGLink[];
+  categories?: D3DAGCategory[];
+}
+
+export interface D3DAGPoint {
+  x: number;
+  y: number;
+}
+
+export interface D3DAGChartProps {
+  data: D3DAGData;
+  width?: number;
+  height?: number;
+  layout?: 'force' | 'layered';
+  direction?: 'LR' | 'TB' | 'RL' | 'BT';
+  onNodeClick?: (node: D3DAGNode, event: Event) => void;
+  onNodeDoubleClick?: (node: D3DAGNode, event: Event) => void;
+  onEdgeClick?: (link: D3DAGLink, event: Event) => void;
+  nodeSize?: number;
+  edgeInset?: number;
+  animationDuration?: number;
+  enableZoom?: boolean;
+  enableDrag?: boolean;
 }

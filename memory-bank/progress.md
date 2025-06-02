@@ -248,6 +248,23 @@ The library has no known critical issues. All core functionality is working as e
 - **Created Edge Style Comparison story** to demonstrate different edge styles
 - **Restored full Storybook functionality** with error-free interactive controls
 
+## D3.js Integration Roadmap
+
+### Planned D3.js Work
+
+1. **Add D3.js as peer dependency** - Completed in techContext update
+2. **Develop D3-ECharts integration patterns** - In progress
+3. **Create prototype components** - Not started
+4. **Add Storybook examples** - Not started
+5. **Document best practices** - Not started
+
+### Expected Benefits
+
+- Enhanced custom visualization capabilities
+- Advanced data processing utilities
+- Seamless integration with existing ECharts components
+- Type-safe interoperability between libraries
+
 ## Evolution of Project Decisions
 
 ### Recent Design Decisions (December 2024)

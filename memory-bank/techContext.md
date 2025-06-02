@@ -9,6 +9,7 @@
 - **React 18+**: Modern React with hooks, forwardRef, and concurrent features
 - **TypeScript 5+**: Full type safety with strict configuration
 - **Apache ECharts**: Powerful charting library as the foundation
+- **D3.js**: Data-Driven Documents library for advanced custom visualizations
 
 #### Build & Development Tools
 
@@ -104,7 +105,8 @@ npm run build-storybook
 ```json
 {
   "react": "^18.0.0",
-  "echarts": "^5.4.0"
+  "echarts": "^5.4.0",
+  "d3": "^7.0.0"
 }
 ```
 
@@ -123,6 +125,7 @@ npm run build-storybook
 
 - **React**: Peer dependency to avoid version conflicts
 - **ECharts**: Peer dependency for bundle size optimization
+- **D3.js**: Peer dependency for advanced custom visualizations and to avoid duplication
 - **TypeScript**: Optional peer for development experience
 
 ## Tool Usage Patterns

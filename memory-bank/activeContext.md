@@ -297,6 +297,22 @@ export const ChartComponent = forwardRef<EChartsRef, ChartProps>(
 );
 ```
 
+## D3.js Integration Work
+
+### Current D3.js Focus
+
+- Adding D3.js as a peer dependency for advanced custom visualizations
+- Developing integration patterns with existing ECharts components
+- Creating documentation and examples for combined D3-ECharts usage
+- Updating type definitions for D3.js interoperability
+
+### Next Steps for D3.js
+
+1. Create prototype components demonstrating D3-ECharts integration
+2. Develop utility functions for data processing with D3
+3. Add examples to Storybook showing combined visualizations
+4. Document best practices for performance with both libraries
+
 ## Project Insights & Learnings
 
 ### Key Successes

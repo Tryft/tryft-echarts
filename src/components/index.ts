@@ -7,3 +7,4 @@ export { DAGChart } from '@/components/DAGChart';
 export { TreemapChart } from '@/components/TreemapChart';
 export { GaugeChart } from '@/components/GaugeChart';
 export { GraphChart } from '@/components/GraphChart';
+export { default as D3DAGChart } from '@/components/D3DAGChart';

@@ -213,6 +213,64 @@ Props Change → Option Regeneration → ECharts setOption → Chart Update
 - Event handlers preserved across re-renders
 - Chart instance reused when possible
 
+## D3.js Integration Patterns
+
+### When to Use D3.js vs ECharts
+
+- **Use ECharts for**:
+  - Standard chart types (line, bar, pie, etc.)
+  - Quick implementation of common visualizations
+  - Built-in interactivity and tooltips
+- **Use D3.js for**:
+  - Highly custom visualizations not covered by ECharts
+  - Advanced data manipulation and transformation
+  - Complex interactions and animations
+
+### Integration Approaches
+
+1. **Data Processing Pipeline**:
+
+```mermaid
+graph LR
+    D[D3 Data Processing] --> E[ECharts Visualization]
+```
+
+2. **Custom Visualization Components**:
+
+```mermaid
+graph LR
+    D[D3 Custom Component] --> R[React Wrapper]
+    R --> A[App]
+```
+
+3. **Combined Rendering**:
+
+```mermaid
+graph LR
+    E[ECharts Canvas] -->|Base Layer| C[Chart]
+    D[D3 SVG] -->|Overlay Layer| C
+```
+
+### Performance Considerations
+
+- Use D3 for data prep, ECharts for rendering
+- Avoid overlapping DOM operations
+- Memoize expensive D3 computations
+- Use Web Workers for intensive data processing
+
+### Type Safety Patterns
+
+```tsx
+// D3 function with generics
+function processData<T>(data: T[]): ProcessedData<T> {
+  // D3 processing logic
+}
+
+// Integration with ECharts
+const processed = processData(rawData);
+const option = generateEChartsOption(processed);
+```
+
 ## Code Quality Standards
 
 ### TypeScript Strict Compliance
