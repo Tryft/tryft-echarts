@@ -93,15 +93,15 @@ export const TreeChart = forwardRef<EChartsRef, TreeChartProps>(
 									<span style="font-size: 13px; font-weight: 600; color: #762a83; margin-left: 8px;">${children}</span>
 								</div>
 								${
-  data.description
-    ? `
+                  data.description
+                    ? `
 									<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #f0f0f0;">
 										<span style="font-size: 11px; color: #999; font-weight: normal;">DESCRIPTION:</span>
 										<div style="font-size: 12px; color: #555; margin-top: 2px; font-style: italic;">${data.description}</div>
 									</div>
 								`
-    : ''
-}
+                    : ''
+                }
 							</div>
 						`;
           },
