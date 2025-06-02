@@ -1,26 +1,27 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from '@storybook/test';
 import { DAGChart } from '../components/DAGChart';
 import type { DAGNode, DAGLink } from '../types';
 
-// Sample data for stories
-const sampleDAGData = {
+// Enhanced sample data with proper typing
+const manufacturingWorkflowData = {
   nodes: [
-    // Level 0 - Raw Materials (source nodes - labels on left)
+    // Level 0 - Raw Materials (source nodes)
     {
       id: 'steel',
       name: 'Steel Sheets',
       value: 20,
       level: 0,
       category: 0,
-      description: 'High-grade steel material for chassis',
+      description: 'High-grade steel material for chassis construction',
     },
     {
       id: 'aluminum',
-      name: 'Aluminum',
+      name: 'Aluminum Alloy',
       value: 15,
       level: 0,
       category: 0,
-      description: 'Lightweight aluminum alloy',
+      description: 'Lightweight aluminum for structural components',
     },
     {
       id: 'plastic',
@@ -28,18 +29,18 @@ const sampleDAGData = {
       value: 8,
       level: 0,
       category: 0,
-      description: 'Durable thermoplastic',
+      description: 'Durable thermoplastic for housing',
     },
     {
       id: 'electronics',
-      name: 'Electronics',
+      name: 'Electronics Kit',
       value: 12,
       level: 0,
       category: 0,
-      description: 'Circuit boards and sensors',
+      description: 'Circuit boards, sensors, and control modules',
     },
 
-    // Level 1 - Primary Components (middle nodes - labels below)
+    // Level 1 - Primary Components
     {
       id: 'frame',
       name: 'Main Frame',
@@ -50,11 +51,11 @@ const sampleDAGData = {
     },
     {
       id: 'housing',
-      name: 'Housing',
+      name: 'Protective Housing',
       value: 23,
       level: 1,
       category: 1,
-      description: 'Protective outer shell',
+      description: 'Weather-resistant outer shell',
     },
     {
       id: 'control_unit',
@@ -62,17 +63,17 @@ const sampleDAGData = {
       value: 18,
       level: 1,
       category: 1,
-      description: 'Electronic control system',
+      description: 'Electronic control and monitoring system',
     },
 
-    // Level 2 - Sub-Assemblies (middle nodes - labels below)
+    // Level 2 - Sub-Assemblies
     {
       id: 'mechanical_assy',
       name: 'Mechanical Assembly',
       value: 58,
       level: 2,
       category: 2,
-      description: 'Integrated mechanical components',
+      description: 'Integrated mechanical subsystem',
     },
     {
       id: 'electronic_assy',
@@ -80,78 +81,77 @@ const sampleDAGData = {
       value: 41,
       level: 2,
       category: 2,
-      description: 'Integrated electronic systems',
+      description: 'Complete electronic control system',
     },
 
-    // Level 3 - Final Products (terminal nodes - labels on right)
+    // Level 3 - Final Products
     {
       id: 'product_a',
-      name: 'Product A',
+      name: 'Standard Model',
       value: 100,
       level: 3,
       category: 3,
-      description: 'Standard configuration device',
+      description: 'Base configuration device',
     },
     {
       id: 'product_b',
-      name: 'Product B',
+      name: 'Premium Model',
       value: 120,
       level: 3,
       category: 3,
-      description: 'Premium configuration device',
+      description: 'Enhanced feature set device',
     },
-  ],
+  ] as DAGNode[],
   links: [
-    // Raw materials to components with relationship labels
-    { source: 'steel', target: 'frame', value: 15, label: 'forms' },
+    // Raw materials to components
+    { source: 'steel', target: 'frame', value: 15, label: 'forms into' },
     { source: 'aluminum', target: 'frame', value: 10, label: 'reinforces' },
-    { source: 'aluminum', target: 'housing', value: 8, label: 'shapes' },
-    { source: 'plastic', target: 'housing', value: 6, label: 'protects' },
-    { source: 'electronics', target: 'control_unit', value: 12, label: 'powers' },
+    { source: 'aluminum', target: 'housing', value: 8, label: 'shapes into' },
+    { source: 'plastic', target: 'housing', value: 6, label: 'molds into' },
+    { source: 'electronics', target: 'control_unit', value: 12, label: 'integrates with' },
 
     // Components to sub-assemblies
-    { source: 'frame', target: 'mechanical_assy', value: 25, label: 'integrates into' },
+    { source: 'frame', target: 'mechanical_assy', value: 25, label: 'assembles into' },
     { source: 'housing', target: 'mechanical_assy', value: 15, label: 'encloses' },
     { source: 'control_unit', target: 'electronic_assy', value: 18, label: 'controls' },
-    { source: 'housing', target: 'electronic_assy', value: 8, label: 'houses' },
+    { source: 'housing', target: 'electronic_assy', value: 8, label: 'protects' },
 
     // Sub-assemblies to final products
-    { source: 'mechanical_assy', target: 'product_a', value: 40, label: 'assembles into' },
+    { source: 'mechanical_assy', target: 'product_a', value: 40, label: 'becomes' },
     { source: 'electronic_assy', target: 'product_a', value: 25, label: 'operates' },
-    { source: 'mechanical_assy', target: 'product_b', value: 45, label: 'assembles into' },
+    { source: 'mechanical_assy', target: 'product_b', value: 45, label: 'becomes' },
     { source: 'electronic_assy', target: 'product_b', value: 30, label: 'operates' },
 
-    // Cross-level dependency
+    // Direct dependency
     { source: 'steel', target: 'mechanical_assy', value: 5, label: 'directly reinforces' },
-  ],
+  ] as DAGLink[],
   categories: [
     { name: 'Raw Materials', itemStyle: { color: '#3498db' } },
     { name: 'Components', itemStyle: { color: '#e74c3c' } },
     { name: 'Sub-Assemblies', itemStyle: { color: '#f39c12' } },
     { name: 'Final Products', itemStyle: { color: '#2ecc71' } },
-    { name: 'Documentation', itemStyle: { color: '#9b59b6' } },
   ],
 };
 
-// Simpler data for edge style comparison
-const edgeStyleData = {
+// Simplified data for Manhattan edge demonstration
+const manhattanDemoData = {
   nodes: [
-    { id: 'input', name: 'Input Node', level: 0, category: 0, value: 50 },
-    { id: 'middle1', name: 'Middle Node 1', level: 1, category: 1, value: 30 },
-    { id: 'middle2', name: 'Middle Node 2', level: 1, category: 1, value: 25 },
-    { id: 'middle3', name: 'Middle Node 3', level: 1, category: 1, value: 20 },
-    { id: 'output1', name: 'Output 1', level: 2, category: 2, value: 35 },
-    { id: 'output2', name: 'Output 2', level: 2, category: 2, value: 40 },
-  ],
+    { id: 'input', name: 'Input Source', level: 0, category: 0, value: 50 },
+    { id: 'process1', name: 'Process Alpha', level: 1, category: 1, value: 30 },
+    { id: 'process2', name: 'Process Beta', level: 1, category: 1, value: 25 },
+    { id: 'process3', name: 'Process Gamma', level: 1, category: 1, value: 20 },
+    { id: 'output1', name: 'Output X', level: 2, category: 2, value: 35 },
+    { id: 'output2', name: 'Output Y', level: 2, category: 2, value: 40 },
+  ] as DAGNode[],
   links: [
-    { source: 'input', target: 'middle1', value: 15, label: 'flow 1' },
-    { source: 'input', target: 'middle2', value: 12, label: 'flow 2' },
-    { source: 'input', target: 'middle3', value: 10, label: 'flow 3' },
-    { source: 'middle1', target: 'output1', value: 18, label: 'process A' },
-    { source: 'middle2', target: 'output1', value: 8, label: 'merge' },
-    { source: 'middle2', target: 'output2', value: 15, label: 'process B' },
-    { source: 'middle3', target: 'output2', value: 12, label: 'enhance' },
-  ],
+    { source: 'input', target: 'process1', value: 15, label: 'feeds' },
+    { source: 'input', target: 'process2', value: 12, label: 'supplies' },
+    { source: 'input', target: 'process3', value: 10, label: 'distributes' },
+    { source: 'process1', target: 'output1', value: 18, label: 'produces' },
+    { source: 'process2', target: 'output1', value: 8, label: 'enhances' },
+    { source: 'process2', target: 'output2', value: 15, label: 'generates' },
+    { source: 'process3', target: 'output2', value: 12, label: 'optimizes' },
+  ] as DAGLink[],
   categories: [
     { name: 'Input', itemStyle: { color: '#3498db' } },
     { name: 'Processing', itemStyle: { color: '#e74c3c' } },
@@ -159,348 +159,486 @@ const edgeStyleData = {
   ],
 };
 
+// Component Meta with Storybook 9 patterns
 const meta = {
   title: 'Charts/DAGChart',
   component: DAGChart,
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'Enhanced DAG (Directed Acyclic Graph) Chart component with square nodes, Manhattan-style edges, branch collapsing, and intelligent label positioning. Features include edge labels, branch highlighting, and smart positioning based on node connectivity.',
+        component: `
+# Enhanced DAG Chart Component
+
+A sophisticated **Directed Acyclic Graph** visualization component built on Apache ECharts with advanced features:
+
+## Key Features
+
+### 🎯 **Smart Layout Algorithms**
+- **Layered Layout**: Hierarchical arrangement with intelligent level-based positioning
+- **Force-Directed Layout**: Physics-based node positioning for organic clustering
+- **Manhattan Routing**: True right-angled edge routing following Manhattan algorithm
+
+### 🔧 **Interactive Capabilities**
+- **Branch Collapsing**: Double-click nodes to collapse/expand downstream branches
+- **Drag & Drop**: Reposition nodes with real-time layout updates
+- **Zoom & Pan**: Navigate large graphs with smooth interactions
+- **Hover Highlighting**: Visual emphasis on connected node networks
+
+### 📊 **Visual Intelligence**
+- **Adaptive Label Positioning**: Smart label placement based on node connectivity
+- **Edge Styling Options**: Straight, curved, or Manhattan-style connections
+- **Category-Based Coloring**: Automatic color coding by node categories
+- **Value-Driven Sizing**: Node sizes reflect importance/values
+
+### 🎨 **Customization Options**
+- Multiple edge rendering styles
+- Configurable layouts and directions
+- Custom color schemes per category
+- Adjustable force simulation parameters
+
+Perfect for **manufacturing workflows**, **data pipelines**, **system architectures**, and any directed graph visualization needs.
+        `,
       },
     },
   },
   tags: ['autodocs'],
   argTypes: {
     width: {
-      control: { type: 'number', min: 400, max: 1600, step: 50 },
-      description: 'Chart width in pixels',
+      control: { type: 'range', min: 600, max: 1600, step: 50 },
+      description: 'Chart container width in pixels',
+      table: {
+        type: { summary: 'number | string' },
+        defaultValue: { summary: 'auto' },
+      },
     },
     height: {
-      control: { type: 'number', min: 300, max: 1200, step: 50 },
-      description: 'Chart height in pixels',
-    },
-    loading: {
-      control: 'boolean',
-      description: 'Show loading state',
+      control: { type: 'range', min: 400, max: 1200, step: 50 },
+      description: 'Chart container height in pixels',
+      table: {
+        type: { summary: 'number | string' },
+        defaultValue: { summary: '400' },
+      },
     },
     layout: {
       control: { type: 'select' },
       options: ['layered', 'force'],
-      description: 'Chart layout algorithm',
+      description: 'Layout algorithm for node positioning',
+      table: {
+        type: { summary: "'layered' | 'force'" },
+        defaultValue: { summary: "'layered'" },
+      },
     },
     direction: {
       control: { type: 'select' },
       options: ['LR', 'TB'],
-      description: 'Layout direction: Left-to-Right or Top-to-Bottom',
+      description: 'Layout direction (Left-to-Right or Top-to-Bottom)',
+      table: {
+        type: { summary: "'LR' | 'TB'" },
+        defaultValue: { summary: "'LR'" },
+      },
     },
     edgeStyle: {
       control: { type: 'select' },
       options: ['straight', 'curved', 'manhattan'],
-      description: 'Edge rendering style: straight (direct lines), curved (bezier curves), manhattan (right-angled)',
-    },
-    draggable: {
-      control: 'boolean',
-      description: 'Allow nodes to be dragged',
-    },
-    roam: {
-      control: 'boolean',
-      description: 'Allow chart panning and zooming',
+      description: 'Edge rendering style with different visual algorithms',
+      table: {
+        type: { summary: "'straight' | 'curved' | 'manhattan'" },
+        defaultValue: { summary: "'straight'" },
+      },
     },
     showEdgeLabels: {
       control: 'boolean',
-      description: 'Display labels on edges',
+      description: 'Display relationship labels on edges',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'false' },
+      },
     },
     collapsible: {
       control: 'boolean',
-      description: 'Allow branch collapsing on double-click',
+      description: 'Enable branch collapsing via double-click',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'true' },
+      },
+    },
+    draggable: {
+      control: 'boolean',
+      description: 'Allow node repositioning via drag & drop',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'true' },
+      },
+    },
+    roam: {
+      control: 'boolean',
+      description: 'Enable chart panning and zooming',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'true' },
+      },
+    },
+    loading: {
+      control: 'boolean',
+      description: 'Show loading overlay',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'false' },
+      },
     },
     data: {
       control: false,
-      description: 'Chart data (nodes, links, categories)',
+      description: 'Chart data structure with nodes, links, and categories',
+      table: {
+        type: {
+          summary: '{ nodes: DAGNode[]; links: DAGLink[]; categories?: Category[] }',
+        },
+      },
     },
   },
   args: {
-    width: 1000,
-    height: 600,
-    loading: false,
+    width: 1200,
+    height: 700,
     layout: 'layered',
     direction: 'LR',
     edgeStyle: 'straight',
-    draggable: true,
-    roam: true,
     showEdgeLabels: false,
     collapsible: true,
+    draggable: true,
+    roam: true,
+    loading: false,
   },
 } satisfies Meta<typeof DAGChart>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Enhanced event handlers with proper typing
+const createEventHandlers = () => ({
+  onChartReady: fn(),
+  onNodeClick: fn((nodeData: DAGNode, _params: unknown) => {
+    console.log('Node clicked:', nodeData.name);
+    const connectivity = (
+      nodeData as DAGNode & {
+        _connectivity?: { incoming: unknown[]; outgoing: unknown[] };
+      }
+    )._connectivity;
+    alert(
+      `🎯 Node: ${nodeData.name}\n` +
+        `📊 Value: ${nodeData.value || 'N/A'}\n` +
+        `🔗 Connections: ${connectivity?.incoming.length || 0} in, ${connectivity?.outgoing.length || 0} out\n` +
+        `📂 Category: ${nodeData.category}`,
+    );
+  }),
+  onNodeDoubleClick: fn((nodeData: DAGNode, _params: unknown) => {
+    console.log('Node double-clicked (branch toggle):', nodeData.name);
+  }),
+  onEdgeClick: fn((linkData: DAGLink, _params: unknown) => {
+    console.log('Edge clicked:', linkData.source, '→', linkData.target);
+    alert(
+      `🔄 Relationship: ${linkData.source} ${linkData.label || 'connects to'} ${linkData.target}\n` +
+        `📈 Flow Value: ${linkData.value || 'N/A'}`,
+    );
+  }),
+});
+
+/**
+ * ## Default Manufacturing Workflow
+ *
+ * A comprehensive example showing a manufacturing process from raw materials to final products.
+ * Features intelligent label positioning, branch highlighting, and relationship labeling.
+ *
+ * **Try these interactions:**
+ * - Click nodes to see connectivity information
+ * - Double-click to collapse/expand branches
+ * - Hover to highlight connected networks
+ * - Use controls to change layout and styling
+ */
 export const Default: Story = {
   args: {
-    data: sampleDAGData,
+    data: manufacturingWorkflowData,
     showEdgeLabels: true,
-    onNodeClick: (nodeData: DAGNode, _params: unknown) => {
-      console.log('Node clicked:', nodeData.name);
-      const connectivity = (nodeData as DAGNode & { _connectivity?: { incoming: unknown[]; outgoing: unknown[] } })
-        ._connectivity;
-      alert(
-        `Node: ${nodeData.name}\nConnections: ${connectivity?.incoming.length || 0} in, ${connectivity?.outgoing.length || 0} out`,
-      );
-    },
-    onNodeDoubleClick: (nodeData: DAGNode, _params: unknown) => {
-      console.log('Node double-clicked (branch toggle):', nodeData.name);
-    },
-    onEdgeClick: (linkData: DAGLink, _params: unknown) => {
-      console.log('Edge clicked:', linkData.source, '→', linkData.target);
-      alert(`Relationship: ${linkData.source} ${linkData.label || 'connects to'} ${linkData.target}`);
-    },
+    ...createEventHandlers(),
   },
 };
 
-export const EdgeStyleComparison: Story = {
+/**
+ * ## Manhattan Edge Routing
+ *
+ * Demonstrates the sophisticated Manhattan layout algorithm with true right-angled routing.
+ * This creates clean, architectural-style connections perfect for system diagrams.
+ *
+ * **Manhattan Algorithm Features:**
+ * - True right-angled paths following bpmn-io algorithm
+ * - Optimized waypoint calculation
+ * - Redundant point elimination
+ * - Professional diagram aesthetics
+ */
+export const ManhattanRouting: Story = {
   args: {
-    data: edgeStyleData,
+    data: manhattanDemoData,
+    edgeStyle: 'manhattan',
     showEdgeLabels: true,
     collapsible: false,
-    width: 1000,
-    height: 600,
   },
   parameters: {
     docs: {
       description: {
         story:
-          'Use the Controls above to switch between different edge styles: straight, curved, and manhattan. This story demonstrates how the same data looks with different edge rendering styles.',
+          'Compare with other edge styles using the controls above. Manhattan routing provides the cleanest, most professional appearance for system architecture diagrams.',
       },
     },
   },
 };
 
+/**
+ * ## Interactive Branch Collapsing
+ *
+ * Complex hierarchical data with collapsible branches for managing information density.
+ * Double-click any node to hide/show its downstream connections.
+ */
 export const BranchCollapsing: Story = {
   args: {
     data: {
       nodes: [
-        // Source
-        { id: 'source', name: 'Source System', level: 0, category: 0, value: 50 },
+        { id: 'root', name: 'System Core', level: 0, category: 0, value: 100 },
 
-        // Level 1 - Three branches
-        { id: 'branch_a', name: 'Branch A', level: 1, category: 1, value: 30 },
-        { id: 'branch_b', name: 'Branch B', level: 1, category: 1, value: 25 },
-        { id: 'branch_c', name: 'Branch C', level: 1, category: 1, value: 20 },
+        // Primary branches
+        { id: 'branch_a', name: 'Module Alpha', level: 1, category: 1, value: 60 },
+        { id: 'branch_b', name: 'Module Beta', level: 1, category: 1, value: 45 },
+        { id: 'branch_c', name: 'Module Gamma', level: 1, category: 1, value: 30 },
 
-        // Level 2 - Sub-branches
-        { id: 'sub_a1', name: 'Sub A1', level: 2, category: 2, value: 15 },
-        { id: 'sub_a2', name: 'Sub A2', level: 2, category: 2, value: 12 },
-        { id: 'sub_b1', name: 'Sub B1', level: 2, category: 2, value: 18 },
-        { id: 'sub_c1', name: 'Sub C1', level: 2, category: 2, value: 10 },
-        { id: 'sub_c2', name: 'Sub C2', level: 2, category: 2, value: 8 },
+        // Secondary level
+        { id: 'sub_a1', name: 'Alpha Processor', level: 2, category: 2, value: 25 },
+        { id: 'sub_a2', name: 'Alpha Cache', level: 2, category: 2, value: 20 },
+        { id: 'sub_b1', name: 'Beta Controller', level: 2, category: 2, value: 30 },
+        { id: 'sub_c1', name: 'Gamma Interface', level: 2, category: 2, value: 15 },
+        { id: 'sub_c2', name: 'Gamma Monitor', level: 2, category: 2, value: 12 },
 
-        // Level 3 - Terminals
-        { id: 'term_a', name: 'Terminal A', level: 3, category: 3, value: 27 },
-        { id: 'term_b', name: 'Terminal B', level: 3, category: 3, value: 18 },
-        { id: 'term_c', name: 'Terminal C', level: 3, category: 3, value: 18 },
-      ],
+        // Terminals
+        { id: 'output_1', name: 'Output Stream A', level: 3, category: 3, value: 45 },
+        { id: 'output_2', name: 'Output Stream B', level: 3, category: 3, value: 30 },
+        { id: 'output_3', name: 'Output Stream C', level: 3, category: 3, value: 27 },
+      ] as DAGNode[],
       links: [
-        { source: 'source', target: 'branch_a', value: 15 },
-        { source: 'source', target: 'branch_b', value: 12 },
-        { source: 'source', target: 'branch_c', value: 10 },
+        { source: 'root', target: 'branch_a', value: 35 },
+        { source: 'root', target: 'branch_b', value: 25 },
+        { source: 'root', target: 'branch_c', value: 20 },
 
-        { source: 'branch_a', target: 'sub_a1', value: 8 },
-        { source: 'branch_a', target: 'sub_a2', value: 7 },
-        { source: 'branch_b', target: 'sub_b1', value: 12 },
-        { source: 'branch_c', target: 'sub_c1', value: 5 },
-        { source: 'branch_c', target: 'sub_c2', value: 5 },
+        { source: 'branch_a', target: 'sub_a1', value: 18 },
+        { source: 'branch_a', target: 'sub_a2', value: 15 },
+        { source: 'branch_b', target: 'sub_b1', value: 22 },
+        { source: 'branch_c', target: 'sub_c1', value: 12 },
+        { source: 'branch_c', target: 'sub_c2', value: 8 },
 
-        { source: 'sub_a1', target: 'term_a', value: 8 },
-        { source: 'sub_a2', target: 'term_a', value: 7 },
-        { source: 'sub_b1', target: 'term_b', value: 12 },
-        { source: 'sub_c1', target: 'term_c', value: 5 },
-        { source: 'sub_c2', target: 'term_c', value: 8 },
-      ],
+        { source: 'sub_a1', target: 'output_1', value: 20 },
+        { source: 'sub_a2', target: 'output_1', value: 15 },
+        { source: 'sub_b1', target: 'output_2', value: 22 },
+        { source: 'sub_c1', target: 'output_3', value: 12 },
+        { source: 'sub_c2', target: 'output_3', value: 10 },
+      ] as DAGLink[],
       categories: [
-        { name: 'Source', itemStyle: { color: '#3498db' } },
-        { name: 'Primary Branches', itemStyle: { color: '#e74c3c' } },
-        { name: 'Sub-Branches', itemStyle: { color: '#f39c12' } },
-        { name: 'Terminals', itemStyle: { color: '#2ecc71' } },
+        { name: 'Core', itemStyle: { color: '#e74c3c' } },
+        { name: 'Modules', itemStyle: { color: '#3498db' } },
+        { name: 'Processors', itemStyle: { color: '#f39c12' } },
+        { name: 'Outputs', itemStyle: { color: '#2ecc71' } },
       ],
     },
     showEdgeLabels: false,
-    collapsible: true,
+    ...createEventHandlers(),
   },
   parameters: {
     docs: {
       description: {
         story:
-          'Double-click on any node to collapse/expand its downstream branch. This is useful for exploring complex workflows by hiding parts of the graph.',
+          '**💡 Tip:** Double-click on "Module Alpha" or "Module Beta" to see branch collapsing in action. This feature helps manage complex diagrams by temporarily hiding sections.',
       },
     },
   },
 };
 
+/**
+ * ## Top-to-Bottom Layout
+ *
+ * Vertical flow diagram perfect for representing hierarchical processes,
+ * organizational charts, or sequential workflows.
+ */
 export const TopBottomLayout: Story = {
-  name: 'Top-to-Bottom Layout',
   args: {
     data: {
       nodes: [
-        // Level 0 - Suppliers (source nodes)
-        {
-          id: 'supplier1',
-          name: 'Supplier A',
-          value: 30,
-          level: 0,
-          category: 0,
-          description: 'Primary material supplier',
-        },
-        {
-          id: 'supplier2',
-          name: 'Supplier B',
-          value: 25,
-          level: 0,
-          category: 0,
-          description: 'Secondary material supplier',
-        },
+        { id: 'strategy', name: 'Strategic Planning', level: 0, category: 0, value: 100 },
 
-        // Level 1 - Warehouses (middle nodes)
-        {
-          id: 'warehouse_central',
-          name: 'Central Warehouse',
-          value: 55,
-          level: 1,
-          category: 1,
-          description: 'Main storage facility',
-        },
-        {
-          id: 'warehouse_regional',
-          name: 'Regional Warehouse',
-          value: 25,
-          level: 1,
-          category: 1,
-          description: 'Regional distribution center',
-        },
+        { id: 'design', name: 'Design Phase', level: 1, category: 1, value: 70 },
+        { id: 'procurement', name: 'Procurement', level: 1, category: 1, value: 50 },
 
-        // Level 2 - Production Lines (middle nodes)
-        { id: 'line1', name: 'Assembly Line 1', value: 40, level: 2, category: 2, description: 'Primary assembly' },
-        { id: 'line2', name: 'Assembly Line 2', value: 35, level: 2, category: 2, description: 'Secondary assembly' },
+        { id: 'development', name: 'Development', level: 2, category: 2, value: 80 },
+        { id: 'testing', name: 'Quality Testing', level: 2, category: 2, value: 60 },
 
-        // Level 3 - Quality Control (middle nodes)
-        {
-          id: 'qc',
-          name: 'Quality Control',
-          value: 75,
-          level: 3,
-          category: 3,
-          description: 'Quality assurance checkpoint',
-        },
-
-        // Level 4 - Distribution (terminal nodes)
-        {
-          id: 'dist_domestic',
-          name: 'Domestic Distribution',
-          value: 45,
-          level: 4,
-          category: 4,
-          description: 'Local market distribution',
-        },
-        {
-          id: 'dist_export',
-          name: 'Export Distribution',
-          value: 30,
-          level: 4,
-          category: 4,
-          description: 'International market distribution',
-        },
-      ],
+        { id: 'deployment', name: 'Deployment', level: 3, category: 3, value: 90 },
+        { id: 'maintenance', name: 'Maintenance', level: 3, category: 3, value: 40 },
+      ] as DAGNode[],
       links: [
-        { source: 'supplier1', target: 'warehouse_central', value: 20, label: 'delivers to' },
-        { source: 'supplier2', target: 'warehouse_central', value: 15, label: 'supplies' },
-        { source: 'supplier2', target: 'warehouse_regional', value: 10, label: 'stocks' },
+        { source: 'strategy', target: 'design', value: 30, label: 'informs' },
+        { source: 'strategy', target: 'procurement', value: 20, label: 'guides' },
 
-        { source: 'warehouse_central', target: 'line1', value: 18, label: 'feeds' },
-        { source: 'warehouse_central', target: 'line2', value: 15, label: 'supplies' },
-        { source: 'warehouse_regional', target: 'line2', value: 8, label: 'supports' },
+        { source: 'design', target: 'development', value: 40, label: 'specifies' },
+        { source: 'procurement', target: 'development', value: 25, label: 'supplies' },
+        { source: 'development', target: 'testing', value: 35, label: 'delivers to' },
 
-        { source: 'line1', target: 'qc', value: 16, label: 'sends for testing' },
-        { source: 'line2', target: 'qc', value: 14, label: 'submits to' },
-
-        { source: 'qc', target: 'dist_domestic', value: 18, label: 'approves for' },
-        { source: 'qc', target: 'dist_export', value: 12, label: 'certifies for' },
-      ],
+        { source: 'testing', target: 'deployment', value: 45, label: 'approves for' },
+        { source: 'deployment', target: 'maintenance', value: 20, label: 'transitions to' },
+      ] as DAGLink[],
       categories: [
-        { name: 'Suppliers', itemStyle: { color: '#9b59b6' } },
-        { name: 'Warehouses', itemStyle: { color: '#3498db' } },
-        { name: 'Production', itemStyle: { color: '#e74c3c' } },
-        { name: 'Quality Control', itemStyle: { color: '#f39c12' } },
-        { name: 'Distribution', itemStyle: { color: '#2ecc71' } },
+        { name: 'Planning', itemStyle: { color: '#9b59b6' } },
+        { name: 'Preparation', itemStyle: { color: '#3498db' } },
+        { name: 'Execution', itemStyle: { color: '#e74c3c' } },
+        { name: 'Operations', itemStyle: { color: '#2ecc71' } },
       ],
     },
     direction: 'TB',
     height: 800,
     showEdgeLabels: true,
+    ...createEventHandlers(),
   },
 };
 
+/**
+ * ## Force-Directed Layout
+ *
+ * Physics-based node positioning creates organic clustering and natural grouping.
+ * Ideal for exploring relationships in complex networks without rigid hierarchy.
+ */
 export const ForceDirectedLayout: Story = {
-  name: 'Force-Directed Layout',
   args: {
     data: {
       nodes: [
-        { id: 'core', name: 'Core System', value: 50, category: 0, description: 'Central processing hub' },
-        { id: 'input1', name: 'Input A', value: 30, category: 1, description: 'Data stream A' },
-        { id: 'input2', name: 'Input B', value: 25, category: 1, description: 'Data stream B' },
-        { id: 'input3', name: 'Input C', value: 20, category: 1, description: 'Data stream C' },
-        { id: 'proc1', name: 'Processor 1', value: 40, category: 2, description: 'Primary processor' },
-        { id: 'proc2', name: 'Processor 2', value: 35, category: 2, description: 'Secondary processor' },
-        { id: 'proc3', name: 'Processor 3', value: 28, category: 2, description: 'Tertiary processor' },
-        { id: 'output1', name: 'Output X', value: 45, category: 3, description: 'Result stream X' },
-        { id: 'output2', name: 'Output Y', value: 40, category: 3, description: 'Result stream Y' },
-        { id: 'output3', name: 'Output Z', value: 35, category: 3, description: 'Result stream Z' },
-      ],
+        { id: 'hub', name: 'Central Hub', value: 80, category: 0 },
+        { id: 'input_a', name: 'Data Source A', value: 40, category: 1 },
+        { id: 'input_b', name: 'Data Source B', value: 35, category: 1 },
+        { id: 'input_c', name: 'Data Source C', value: 30, category: 1 },
+        { id: 'proc_x', name: 'Processor X', value: 50, category: 2 },
+        { id: 'proc_y', name: 'Processor Y', value: 45, category: 2 },
+        { id: 'proc_z', name: 'Processor Z', value: 40, category: 2 },
+        { id: 'result_1', name: 'Result Alpha', value: 60, category: 3 },
+        { id: 'result_2', name: 'Result Beta', value: 55, category: 3 },
+        { id: 'result_3', name: 'Result Gamma', value: 50, category: 3 },
+      ] as DAGNode[],
       links: [
-        { source: 'input1', target: 'core', value: 10, label: 'feeds' },
-        { source: 'input2', target: 'core', value: 8, label: 'supplies' },
-        { source: 'input3', target: 'core', value: 6, label: 'provides' },
-        { source: 'core', target: 'proc1', value: 12, label: 'distributes to' },
-        { source: 'core', target: 'proc2', value: 10, label: 'routes to' },
-        { source: 'core', target: 'proc3', value: 8, label: 'sends to' },
-        { source: 'proc1', target: 'output1', value: 15, label: 'produces' },
-        { source: 'proc1', target: 'output2', value: 8, label: 'generates' },
-        { source: 'proc2', target: 'output2', value: 12, label: 'creates' },
-        { source: 'proc2', target: 'output3', value: 10, label: 'outputs' },
-        { source: 'proc3', target: 'output3', value: 8, label: 'delivers' },
-      ],
+        { source: 'input_a', target: 'hub', value: 15, label: 'feeds' },
+        { source: 'input_b', target: 'hub', value: 12, label: 'supplies' },
+        { source: 'input_c', target: 'hub', value: 10, label: 'provides' },
+        { source: 'hub', target: 'proc_x', value: 18, label: 'distributes' },
+        { source: 'hub', target: 'proc_y', value: 15, label: 'routes' },
+        { source: 'hub', target: 'proc_z', value: 12, label: 'channels' },
+        { source: 'proc_x', target: 'result_1', value: 20, label: 'generates' },
+        { source: 'proc_x', target: 'result_2', value: 10, label: 'produces' },
+        { source: 'proc_y', target: 'result_2', value: 15, label: 'enhances' },
+        { source: 'proc_y', target: 'result_3', value: 12, label: 'creates' },
+        { source: 'proc_z', target: 'result_3', value: 14, label: 'optimizes' },
+      ] as DAGLink[],
       categories: [
-        { name: 'Core', itemStyle: { color: '#e74c3c' } },
+        { name: 'Hub', itemStyle: { color: '#e74c3c' } },
         { name: 'Inputs', itemStyle: { color: '#3498db' } },
         { name: 'Processors', itemStyle: { color: '#f39c12' } },
-        { name: 'Outputs', itemStyle: { color: '#2ecc71' } },
+        { name: 'Results', itemStyle: { color: '#2ecc71' } },
       ],
     },
     layout: 'force',
     showEdgeLabels: true,
     force: {
       repulsion: 1200,
-      gravity: 0.1,
-      edgeLength: [80, 150],
+      gravity: 0.15,
+      edgeLength: [120, 180],
       friction: 0.6,
       layoutAnimation: true,
     },
-    onNodeClick: (nodeData: DAGNode, _params: unknown) => {
-      console.log('Force layout node clicked:', nodeData.name);
-      alert(`Node: ${nodeData.name}\nHover over nodes/edges to see branch highlighting!`);
+    ...createEventHandlers(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '**🔬 Physics Simulation:** Nodes automatically organize based on force simulation. Drag nodes to see the physics engine in action!',
+      },
     },
   },
 };
 
+/**
+ * ## Edge Style Comparison
+ *
+ * Interactive demonstration of all three edge rendering styles.
+ * Use the controls to switch between straight, curved, and Manhattan routing.
+ */
+export const EdgeStyleComparison: Story = {
+  args: {
+    data: manhattanDemoData,
+    edgeStyle: 'manhattan',
+    showEdgeLabels: true,
+    collapsible: false,
+    ...createEventHandlers(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**🎨 Edge Style Guide:**
+
+- **Straight**: Direct lines, minimal visual noise
+- **Curved**: Smooth bezier curves, organic feel  
+- **Manhattan**: Right-angled routing, architectural precision
+
+Try switching between styles using the edge style control above!
+        `,
+      },
+    },
+  },
+};
+
+/**
+ * ## Loading State
+ *
+ * Demonstrates the loading overlay functionality for async data scenarios.
+ */
 export const Loading: Story = {
-  name: 'Loading State',
   args: {
     loading: true,
     data: {
-      nodes: [{ id: 'node1', name: 'Loading Node', value: 50, level: 0, category: 0 }],
-      links: [],
-      categories: [{ name: 'Loading', itemStyle: { color: '#3498db' } }],
+      nodes: [{ id: 'loading', name: 'Loading...', value: 50, level: 0, category: 0 }] as DAGNode[],
+      links: [] as DAGLink[],
+      categories: [{ name: 'Loading', itemStyle: { color: '#95a5a6' } }],
     },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Shows the loading overlay that appears while chart data is being fetched or processed.',
+      },
+    },
+  },
+};
+
+/**
+ * ## Minimal Configuration
+ *
+ * Simplest possible setup demonstrating default behaviors with minimal data.
+ */
+export const Minimal: Story = {
+  args: {
+    data: {
+      nodes: [
+        { id: 'start', name: 'Start', level: 0, category: 0 },
+        { id: 'end', name: 'End', level: 1, category: 1 },
+      ] as DAGNode[],
+      links: [{ source: 'start', target: 'end' }] as DAGLink[],
+      categories: [
+        { name: 'Begin', itemStyle: { color: '#3498db' } },
+        { name: 'Finish', itemStyle: { color: '#2ecc71' } },
+      ],
+    },
+    width: 600,
+    height: 400,
   },
 };
