@@ -378,7 +378,7 @@ export const Default: Story = {
 export const ManhattanRouting: Story = {
   args: {
     data: manhattanDemoData,
-    edgeStyle: 'manhattan',
+    edgeStyle: 'curved',
     showEdgeLabels: true,
     collapsible: false,
   },
@@ -575,7 +575,7 @@ export const ForceDirectedLayout: Story = {
 export const EdgeStyleComparison: Story = {
   args: {
     data: manhattanDemoData,
-    edgeStyle: 'manhattan',
+    edgeStyle: 'curved',
     showEdgeLabels: true,
     collapsible: false,
     ...createEventHandlers(),

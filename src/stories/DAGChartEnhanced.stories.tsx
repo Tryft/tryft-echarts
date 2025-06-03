@@ -310,7 +310,7 @@ export const ComplexManufacturing: Story = {
 export const ManhattanRouting: Story = {
   args: {
     data: manhattanDemoData,
-    edgeStyle: 'manhattan',
+    edgeStyle: 'curved',
     showEdgeLabels: true,
     height: 600,
     ...createEventHandlers(),
@@ -347,7 +347,7 @@ export const VerticalManhattan: Story = {
   args: {
     data: manhattanDemoData,
     direction: 'TB',
-    edgeStyle: 'manhattan',
+    edgeStyle: 'curved',
     showEdgeLabels: true,
     height: 900,
     ...createEventHandlers(),
@@ -385,7 +385,7 @@ export const ForceLayoutCollapsing: Story = {
 export const EdgeStyleComparison: Story = {
   args: {
     data: manhattanDemoData,
-    edgeStyle: 'manhattan',
+    edgeStyle: 'curved',
     showEdgeLabels: true,
     height: 600,
     ...createEventHandlers(),
