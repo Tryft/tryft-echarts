@@ -4,7 +4,7 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from '@storybook/test';
 
-import type { DAGNode, DAGLink } from '../types';
+import type { D3DAGNode, D3DAGLink } from '../types';
 import { D3DAGChart } from '@/components';
 
 // Automotive Manufacturing Example - Multiple Raw Materials → Semi-Finished → Final Assembly
@@ -40,7 +40,7 @@ const automotiveManufacturingData = {
     { id: 'sedan_model', name: 'Sedan Model', value: 3000, level: 4, category: 4 },
     { id: 'suv_model', name: 'SUV Model', value: 3500, level: 4, category: 4 },
     { id: 'truck_model', name: 'Truck Model', value: 4000, level: 4, category: 4 },
-  ] as DAGNode[],
+  ] as D3DAGNode[],
   links: [
     // Raw materials to basic components
     { source: 'steel_sheets', target: 'body_panels', value: 300, label: 'stamping' },
@@ -79,7 +79,7 @@ const automotiveManufacturingData = {
     // Direct material to final products (bypass platform)
     { source: 'steel_sheets', target: 'truck_model', value: 100, label: 'bed reinforcement' },
     { source: 'aluminum_bars', target: 'sedan_model', value: 50, label: 'lightweight trim' },
-  ] as DAGLink[],
+  ] as D3DAGLink[],
   categories: [
     { name: 'Raw Materials', itemStyle: { color: '#8B4513' } },
     { name: 'Basic Components', itemStyle: { color: '#FF6B35' } },
@@ -121,7 +121,7 @@ const smartphoneManufacturingData = {
     { id: 'budget_phone', name: 'Budget Phone', value: 700, level: 4, category: 4 },
     { id: 'flagship_phone', name: 'Flagship Phone', value: 1000, level: 4, category: 4 },
     { id: 'pro_phone', name: 'Pro Phone', value: 1200, level: 4, category: 4 },
-  ] as DAGNode[],
+  ] as D3DAGNode[],
   links: [
     // Raw materials to components
     { source: 'silicon_wafers', target: 'processor_chips', value: 100, label: 'fabrication' },
@@ -158,7 +158,7 @@ const smartphoneManufacturingData = {
     // Direct components to specific models
     { source: 'camera_sensors', target: 'pro_phone', value: 10, label: 'extra sensor' },
     { source: 'memory_chips', target: 'flagship_phone', value: 20, label: 'upgrade' },
-  ] as DAGLink[],
+  ] as D3DAGLink[],
   categories: [
     { name: 'Raw Materials', itemStyle: { color: '#2E86AB' } },
     { name: 'Components', itemStyle: { color: '#A23B72' } },
@@ -209,7 +209,7 @@ const foodProductionData = {
     // Level 4 - Packaged Products
     { id: 'boxed_cake', name: 'Boxed Cake', value: 650, level: 4, category: 4 },
     { id: 'wrapped_bars', name: 'Wrapped Bars', value: 450, level: 4, category: 4 },
-  ] as DAGNode[],
+  ] as D3DAGNode[],
   links: [
     // Raw ingredients to processed
     { source: 'wheat_grain', target: 'flour', value: 800, label: 'milling' },
@@ -251,7 +251,7 @@ const foodProductionData = {
     // Cross-dependencies
     { source: 'aluminum_foil', target: 'wrapped_bars', value: 20, label: 'inner wrap' },
     { source: 'sugar_refined', target: 'chocolate_bars', value: 50, label: 'direct sweetening' },
-  ] as DAGLink[],
+  ] as D3DAGLink[],
   categories: [
     { name: 'Raw Ingredients', itemStyle: { color: '#8FBC8F' } },
     { name: 'Processed Ingredients', itemStyle: { color: '#DDA0DD' } },
@@ -440,7 +440,7 @@ export const InteractiveDemoWithControls: Story = {
         { id: 'G', name: 'Final', category: 'output', value: 40, level: 4 },
         { id: 'H', name: 'Monitor', category: 'process', value: 20, level: 2 },
         { id: 'I', name: 'Log', category: 'output', value: 15, level: 3 },
-      ] as DAGNode[],
+      ] as D3DAGNode[],
       links: [
         { source: 'A', target: 'B', value: 10, label: 'init' },
         { source: 'A', target: 'C', value: 8, label: 'parallel' },
@@ -453,7 +453,7 @@ export const InteractiveDemoWithControls: Story = {
         { source: 'B', target: 'H', value: 2, label: 'monitor' },
         { source: 'H', target: 'I', value: 1, label: 'log' },
         { source: 'C', target: 'H', value: 1, label: 'track' },
-      ] as DAGLink[],
+      ] as D3DAGLink[],
       categories: [
         { name: 'input', itemStyle: { color: '#5470c6' } },
         { name: 'process', itemStyle: { color: '#91cc75' } },
@@ -696,7 +696,7 @@ export const ManhattanRoutingDemo: Story = {
         { id: 'E', name: 'Convergence', level: 2, category: 2, value: 80 },
         { id: 'F', name: 'Output F', level: 3, category: 3, value: 70 },
         { id: 'G', name: 'Output G', level: 3, category: 3, value: 65 },
-      ] as DAGNode[],
+      ] as D3DAGNode[],
       links: [
         { source: 'A', target: 'C', value: 25, label: 'route 1' },
         { source: 'B', target: 'C', value: 20, label: 'route 2' },
@@ -705,7 +705,7 @@ export const ManhattanRoutingDemo: Story = {
         { source: 'D', target: 'E', value: 35, label: 'merge 2' },
         { source: 'E', target: 'F', value: 35, label: 'split 1' },
         { source: 'E', target: 'G', value: 30, label: 'split 2' },
-      ] as DAGLink[],
+      ] as D3DAGLink[],
       categories: [
         { name: 'Inputs', itemStyle: { color: '#3498db' } },
         { name: 'Processing', itemStyle: { color: '#e74c3c' } },
@@ -807,7 +807,7 @@ export const MultiLevelConvergence: Story = {
         { id: 'final2', name: 'Variant B', level: 4, category: 4, value: 650 },
         { id: 'final3', name: 'Variant C', level: 4, category: 4, value: 700 },
         { id: 'final4', name: 'Variant D', level: 4, category: 4, value: 750 },
-      ] as DAGNode[],
+      ] as D3DAGNode[],
       links: [
         // Raw materials to components (many-to-many)
         { source: 'mat1', target: 'comp1', value: 50 },
@@ -843,7 +843,7 @@ export const MultiLevelConvergence: Story = {
         // Cross-level dependencies
         { source: 'mat1', target: 'core', value: 20 },
         { source: 'comp1', target: 'final4', value: 30 },
-      ] as DAGLink[],
+      ] as D3DAGLink[],
       categories: [
         { name: 'Raw Materials', itemStyle: { color: '#34495e' } },
         { name: 'Components', itemStyle: { color: '#e67e22' } },

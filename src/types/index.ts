@@ -301,8 +301,8 @@ export interface D3DAGNode {
 }
 
 export interface D3DAGLink {
-  source: string; // Can be a node or ID
-  target: string; // Can be a node or ID
+  source: D3DAGNode; // Can be a node or ID
+  target: D3DAGNode; // Can be a node or ID
   value?: number;
   label?: string;
   lineStyle?: { color?: string; width?: number; type?: string };
@@ -340,4 +340,5 @@ export interface D3DAGChartProps {
   animationDuration?: number;
   enableZoom?: boolean;
   enableDrag?: boolean;
+  hiddenCategories?: Set<string>;
 }

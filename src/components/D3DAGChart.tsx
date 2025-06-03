@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
+ 
+ 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
-import { D3DAGChartProps, D3DAGNode, D3DAGPoint, D3DAGLink } from '@/types';
+import { D3DAGChartProps, D3DAGNode, D3DAGPoint, D3DAGLink, D3DAGData } from '@/types';
 
-// TypeScript interfaces
-
+const NODE_VISIBILITY_THRESHOLD = 0.05; // Minimum opacity for visible nodes
+const EDGE_VISIBILITY_THRESHOLD = 0.05; // Minimum opacity for visible edges
 /**
  * Renders a directed acyclic graph (DAG) using D3.js with collapsible nodes and Manhattan-style edges.
  *
@@ -33,6 +32,7 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
   edgeInset = 16,
   animationDuration = 750,
   enableZoom = true,
+  hiddenCategories = new Set<string>(), // Categories to hide by default
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [tooltip, setTooltip] = useState<{ visible: boolean; x: number; y: number; content: string }>({
@@ -42,7 +42,7 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
     content: '',
   });
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
-  const [hiddenCategories, _setHiddenCategories] = useState<Set<string>>(new Set());
+  // const [hiddenCategories, _setHiddenCategories] = useState<Set<string>>(new Set());
 
   // Enhanced Manhattan Edge Routing Algorithm with proper arrow positioning
   /**
@@ -142,23 +142,23 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
         if (processed.has(currentId)) continue;
         processed.add(currentId);
 
-        // Find all direct children of current node
-        const directChildren = links.filter((l) => l.source === currentId).map((l) => l.target);
+        // Find all direct children of current node - FIXED: access .id property
+        const directChildren = links.filter((l) => l.source.id === currentId).map((l) => l.target);
 
-        directChildren.forEach((childId) => {
-          // Check if this child has other visible incoming edges (alternate paths)
+        directChildren.forEach((childNode) => {
+          // Check if this child has other visible incoming edges (alternate paths) - FIXED: access .id property
           const otherIncomingEdges = links.filter(
             (link) =>
-              link.target === childId &&
-              link.source !== currentId &&
-              !collapsedNodes.has(link.source) &&
-              !descendants.has(link.source),
+              link.target.id === childNode.id &&
+              link.source.id !== currentId &&
+              !collapsedNodes.has(link.source.id) &&
+              !descendants.has(link.source.id),
           );
 
           // Only hide if no alternate paths exist
           if (otherIncomingEdges.length === 0) {
-            descendants.add(childId);
-            toProcess.push(childId); // Continue recursively
+            descendants.add(childNode.id);
+            toProcess.push(childNode.id); // Continue recursively
           }
         });
       }
@@ -186,19 +186,6 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
     });
   }, []);
 
-  // Toggle category visibility
-  // const toggleCategoryVisibility = useCallback((categoryName: string) => {
-  //   setHiddenCategories((prev) => {
-  //     const newHidden = new Set(prev);
-  //     if (newHidden.has(categoryName)) {
-  //       newHidden.delete(categoryName);
-  //     } else {
-  //       newHidden.add(categoryName);
-  //     }
-  //     return newHidden;
-  //   });
-  // }, []);
-
   // Stable layered layout that doesn't rearrange on collapse
   const [nodePositions, setNodePositions] = useState<Map<string, { x: number; y: number }>>(new Map());
 
@@ -210,9 +197,10 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
    * @param isInitial - Whether this is the initial layout
    */
   const layeredLayout = useCallback(
-    (nodes: D3DAGNode[], links: D3DAGLink[], isInitial = false) => {
+    (nodes: D3DAGNode[], _links: D3DAGLink[], isInitial = false) => {
       // Only recalculate positions on initial render or when explicitly needed
       if (!isInitial && nodePositions.size > 0) {
+        // if (!isInitial && nodePositions.size > 0 && data.nodes.length === nodePositions.size) {
         // Use existing positions for stability
         nodes.forEach((node) => {
           const pos = nodePositions.get(node.id);
@@ -238,9 +226,10 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
         outEdges.set(node.id, []);
       });
 
+      // FIXED: Always access .id property consistently
       allLinks.forEach((link) => {
-        const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
-        const targetId = typeof link.target === 'string' ? link.target : link.target.id;
+        const sourceId = link.source.id;
+        const targetId = link.target.id;
         inDegree.set(targetId, (inDegree.get(targetId) || 0) + 1);
         outEdges.get(sourceId)?.push(targetId);
       });
@@ -315,13 +304,23 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
   // Force simulation
   const createForceSimulation = useCallback(
     (nodes: D3DAGNode[], links: D3DAGLink[]) => {
+      // Convert links to use string IDs for D3's force simulation
+      const d3Links = links.map(
+        (link) =>
+          ({
+            ...link,
+            source: link.source,
+            target: link.target,
+          }) as D3DAGLink,
+      );
+
       const simulation = d3
-        .forceSimulation(nodes)
+        .forceSimulation<D3DAGNode>(nodes)
         .force(
           'link',
           d3
-            .forceLink(links)
-            .id((d: any) => d.id)
+            .forceLink<D3DAGNode, D3DAGLink>(d3Links)
+            .id((d) => d.id)
             .distance(100)
             .strength(0.5),
         )
@@ -344,44 +343,45 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
     [data.categories],
   );
 
-  // Process data based on collapsed and hidden states (fixed collapse logic)
+  // Process data based on collapsed and hidden states (FIXED collapse logic)
   const processedData = useMemo(() => {
-    let visibleNodes = data.nodes.filter((node) => !hiddenCategories.has(node.category || ''));
+    // let visibleNodes = data.nodes.filter((node) => !hiddenCategories.has(node.category || ''));
+    let visibleNodes = data.nodes; // Keep all nodes
 
-    let hiddenNodeIds = new Set<string>();
-    let hiddenLinkIds = new Set<string>();
+    const hiddenNodeIds = new Set<string>();
+    const hiddenLinkIds = new Set<string>();
 
-    // Step 1: Hide all outgoing edges from collapsed nodes
+    // Step 1: Hide all outgoing edges from collapsed nodes - FIXED: access .id property
     data.links.forEach((link) => {
-      const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
-      if (collapsedNodes.has(sourceId)) {
-        hiddenLinkIds.add(`${sourceId}-${link.target}`);
+      const sourceNode = link.source;
+      if (collapsedNodes.has(sourceNode.id)) {
+        hiddenLinkIds.add(`${sourceNode.id}-${link.target.id}`);
       }
     });
 
-    // Step 2: Find nodes to hide (those with no visible incoming edges)
+    // Step 2: Find nodes to hide (those with no visible incoming edges) - FIXED: access .id property
     const findNodesToHide = () => {
       const currentlyHiddenNodes = new Set(hiddenNodeIds);
 
       data.nodes.forEach((node) => {
         if (collapsedNodes.has(node.id) || currentlyHiddenNodes.has(node.id)) return;
 
-        // Check if this node has any visible incoming edges
-        const incomingLinks = data.links.filter((link) => link.target === node.id);
+        // Check if this node has any visible incoming edges - FIXED: access .id property
+        const incomingLinks = data.links.filter((link) => link.target.id === node.id);
         const visibleIncoming = incomingLinks.filter((link) => {
-          const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
-          const linkId = `${sourceId}-${link.target}`;
-          return !hiddenLinkIds.has(linkId) && !currentlyHiddenNodes.has(sourceId);
+          const sourceNode = link.source;
+          const linkId = `${sourceNode.id}-${link.target.id}`;
+          return !hiddenLinkIds.has(linkId) && !currentlyHiddenNodes.has(sourceNode.id);
         });
 
         // If no visible incoming edges and not a root node, hide it
         if (visibleIncoming.length === 0 && incomingLinks.length > 0) {
           hiddenNodeIds.add(node.id);
-          // Also hide all outgoing edges from this now-hidden node
+          // Also hide all outgoing edges from this now-hidden node - FIXED: access .id property
           data.links.forEach((outLink) => {
-            const outSourceId = typeof outLink.source === 'string' ? outLink.source : outLink.source.id;
-            if (outSourceId === node.id) {
-              hiddenLinkIds.add(`${outSourceId}-${outLink.target}`);
+            const outSource = outLink.source;
+            if (outSource.id === node.id) {
+              hiddenLinkIds.add(`${outSource.id}-${outLink.target.id}`);
             }
           });
         }
@@ -398,15 +398,16 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
     // Filter out hidden nodes
     visibleNodes = visibleNodes.filter((node) => !hiddenNodeIds.has(node.id));
 
-    // Filter out hidden links
-    const visibleNodeIds = new Set(visibleNodes.map((n) => n.id));
-    const visibleLinks = data.links.filter((link) => {
-      const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
-      const targetId = typeof link.target === 'string' ? link.target : link.target.id;
-      const linkId = `${sourceId}-${targetId}`;
+    // Filter out hidden links - FIXED: access .id property
+    // const visibleNodeIds = new Set(visibleNodes.map((n) => n.id));
+    // const visibleLinks = data.links.filter((link) => {
+    //   const source = link.source;
+    //   const target = link.target;
+    //   const linkId = `${source.id}-${target.id}`;
 
-      return !hiddenLinkIds.has(linkId) && visibleNodeIds.has(sourceId) && visibleNodeIds.has(targetId);
-    });
+    //   return !hiddenLinkIds.has(linkId) && visibleNodeIds.has(source.id) && visibleNodeIds.has(target.id);
+    // });
+    const visibleLinks = data.links; // Keep all links
 
     return {
       nodes: visibleNodes.map((node) => ({
@@ -415,7 +416,7 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
         descendantCount: collapsedNodes.has(node.id) ? getCollapsibleDescendants(node.id, data.links).size : 0,
       })),
       links: visibleLinks,
-    };
+    } as D3DAGData;
   }, [data, collapsedNodes, hiddenCategories, getCollapsibleDescendants]);
 
   // Show tooltip near cursor
@@ -423,10 +424,38 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
     const rect = svgRef.current?.getBoundingClientRect();
     if (!rect) return;
 
+    const tooltipWidth = 200; // maxWidth in style
+    const tooltipHeight = 80; // estimate, could be improved by measuring
+    // Get SVG bounding rect
+    const svgRect = svgRef.current?.getBoundingClientRect();
+    if (!svgRect) return;
+
+    // Calculate mouse position relative to SVG, offset by 20px
+    let x = event.clientX - svgRect.left + 20;
+    let y = event.clientY - svgRect.top + 20;
+
+    // Clamp right edge
+    if (x + tooltipWidth > svgRect.width) {
+      x = svgRect.width - tooltipWidth - 8;
+    }
+    // Clamp left edge
+    if (x < 8) {
+      x = 8;
+    }
+
+    // Clamp bottom edge
+    if (y + tooltipHeight > svgRect.height) {
+      y = svgRect.height - tooltipHeight - 8;
+    }
+    // Clamp top edge
+    if (y < 8) {
+      y = 8;
+    }
+
     setTooltip({
       visible: true,
-      x: event.clientX - rect.left + 10,
-      y: event.clientY - rect.top - 10,
+      x,
+      y,
       content,
     });
   }, []);
@@ -444,8 +473,8 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
     svg.selectAll('*').remove();
 
     // Create working copies of data
-    let workingNodes = processedData.nodes.map((n) => ({ ...n }));
-    let workingLinks = processedData.links.map((l) => ({ ...l }));
+    const workingNodes = processedData.nodes.map((n) => ({ ...n }) as D3DAGNode);
+    const workingLinks = processedData.links.map((l) => ({ ...l }) as D3DAGLink);
 
     // Set up zoom
     const g = svg.append('g').attr('class', 'main-group');
@@ -479,11 +508,14 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
     const update = () => {
       // Filter and prepare links with resolved source/target
       const resolvedLinks = workingLinks
-        .map((link) => ({
-          ...link,
-          source: workingNodes.find((n) => n.id === (typeof link.source === 'string' ? link.source : link.source.id))!,
-          target: workingNodes.find((n) => n.id === (typeof link.target === 'string' ? link.target : link.target.id))!,
-        }))
+        .map(
+          (link) =>
+            ({
+              ...link,
+              source: workingNodes.find((n) => n.id === link.source.id)!,
+              target: workingNodes.find((n) => n.id === link.target.id)!,
+            }) as D3DAGLink,
+        )
         .filter((link) => link.source && link.target);
 
       // Add arrowhead marker definition
@@ -504,10 +536,10 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
 
       // Update links
       const linkSelection = linkGroup
-        .selectAll('.link')
-        .data(resolvedLinks, (d: any) => `${d.source.id}-${d.target.id}`);
+        .selectAll<SVGPathElement, D3DAGLink>('.link')
+        .data(resolvedLinks, (d) => `${d.source.id}-${d.target.id}`);
 
-      linkSelection.exit().transition().duration(animationDuration).style('opacity', 0).remove();
+      linkSelection.exit().transition().duration(animationDuration).style('opacity', EDGE_VISIBILITY_THRESHOLD);
 
       const linkEnter = linkSelection
         .enter()
@@ -516,7 +548,7 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
         .style('fill', 'none')
         .style('stroke', (d) => d.lineStyle?.color || '#666')
         .style('stroke-width', (d) => d.lineStyle?.width || 2)
-        .style('opacity', 0)
+        .style('opacity', EDGE_VISIBILITY_THRESHOLD)
         .attr('marker-end', 'url(#arrowhead)')
         .on('click', (event, d) => {
           event.stopPropagation();
@@ -528,7 +560,7 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
           connectedNodes.add(d.target.id);
 
           linkSelection.merge(linkEnter).style('stroke-opacity', (l) => {
-            return connectedNodes.has(l.source.id) || connectedNodes.has(l.target.id) ? 1 : 0.2;
+            return connectedNodes.has(l.source.id) || connectedNodes.has(l.target.id) ? 1 : EDGE_VISIBILITY_THRESHOLD;
           });
 
           nodeSelection.merge(nodeEnter).style('opacity', (n) => (connectedNodes.has(n.id) ? 1 : 0.3));
@@ -569,9 +601,14 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
 
         return pathData(points) || '';
       });
+      linkUpdate.style('opacity', (d) =>
+        hiddenCategories.has(d.source.category || '') || hiddenCategories.has(d.target.category || '')
+          ? EDGE_VISIBILITY_THRESHOLD
+          : 0.8,
+      );
 
       // Update nodes
-      const nodeSelection = nodeGroup.selectAll('.node').data(workingNodes, (d: any) => d.id);
+      const nodeSelection = nodeGroup.selectAll<SVGGElement, D3DAGNode>('.node').data(workingNodes, (d) => d.id);
 
       nodeSelection.exit().transition().duration(animationDuration).style('opacity', 0).remove();
 
@@ -621,7 +658,6 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
 
       // Update node positions
       nodeUpdate.attr('transform', (d) => `translate(${d.x || 0}, ${d.y || 0})`);
-
       // Update collapse indicators
       nodeUpdate
         .select('.collapse-indicator')
@@ -680,9 +716,16 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
         })
         .on('mouseleave', () => {
           linkUpdate.style('stroke-opacity', 1);
-          nodeUpdate.style('opacity', 1);
+          nodeUpdate.style('opacity', (d) => (hiddenCategories.has(d.category || '') ? NODE_VISIBILITY_THRESHOLD : 1));
+
+          linkUpdate.style('opacity', (d) =>
+            hiddenCategories.has(d.source.category || '') || hiddenCategories.has(d.target.category || '')
+              ? EDGE_VISIBILITY_THRESHOLD
+              : 0.8,
+          );
           hideTooltip();
         });
+      nodeUpdate.style('opacity', (d) => (hiddenCategories.has(d.category || '') ? NODE_VISIBILITY_THRESHOLD : 1));
     };
 
     // Initial render
@@ -691,19 +734,7 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
     // Simulation tick handler
     if (simulation) {
       simulation.on('tick', () => {
-        // const currentResolvedLinks = workingLinks
-        //   .map((link) => ({
-        //     ...link,
-        //     source: workingNodes.find(
-        //       (n) => n.id === (typeof link.source === 'string' ? link.source : link.source.id),
-        //     )!,
-        //     target: workingNodes.find(
-        //       (n) => n.id === (typeof link.target === 'string' ? link.target : link.target.id),
-        //     )!,
-        //   }))
-        //   .filter((link) => link.source && link.target);
-
-        linkGroup.selectAll('.link').attr('d', (d: any) => {
+        linkGroup.selectAll<SVGPathElement, D3DAGLink>('.link').attr('d', (d) => {
           const points = manhattanEdge(d.source, d.target);
           if (points.length === 0) return '';
 
@@ -716,7 +747,7 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
           return pathData(points) || '';
         });
 
-        nodeGroup.selectAll('.node').attr('transform', (d: any) => `translate(${d.x}, ${d.y})`);
+        nodeGroup.selectAll<SVGGElement, D3DAGNode>('.node').attr('transform', (d) => `translate(${d.x}, ${d.y})`);
       });
     }
 
@@ -745,7 +776,9 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
     getFullPaths,
     nodePositions,
   ]);
-
+  useEffect(() => {
+    setNodePositions(new Map());
+  }, [data]);
   return (
     <div style={{ position: 'relative', width, height }}>
       <svg ref={svgRef} width={width} height={height} style={{ border: '1px solid #ddd', background: '#fafafa' }} />
