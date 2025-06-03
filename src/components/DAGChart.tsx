@@ -466,9 +466,10 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
           textStyle: {
             color: '#333',
           },
-          formatter: (params: EChartsEventParams) => {
-            if (params.dataType === 'edge') {
-              const data = params.data as EdgeData;
+          formatter: (params) => {
+            const typedParams = params as unknown as EChartsEventParams;
+            if (typedParams.dataType === 'edge') {
+              const data = typedParams.data as EdgeData;
               const link = processedData.links.find((l) => l.source === data.source && l.target === data.target);
               return `
                 <div style="padding: 8px 12px; line-height: 1.6;">
@@ -481,7 +482,7 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
               `;
             }
 
-            const node = params.data as EChartsNodeData;
+            const node = typedParams.data as EChartsNodeData;
             const categoryName = data.categories?.[node.category || 0]?.name || 'Unknown';
             const connectivity = node._connectivity;
 
