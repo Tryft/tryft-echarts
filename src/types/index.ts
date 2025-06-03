@@ -85,7 +85,7 @@ export interface TreeNodeData {
   name: string;
   value?: number;
   description?: string;
-  children?: string[];
+  children?: TreeNodeData[];
   collapsed?: boolean;
   x?: number;
   y?: number;
@@ -156,7 +156,7 @@ export interface TreeChartProps extends BaseEChartsProps {
 /**
  * Edge style types for DAG Chart
  */
-export type EdgeStyle = 'straight' | 'curved' | 'manhattan';
+export type EdgeStyle = 'straight' | 'curved';
 
 /**
  * DAG Chart props for manufacturing workflows with layered layout

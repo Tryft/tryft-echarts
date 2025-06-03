@@ -1,7 +1,7 @@
 import { forwardRef, useMemo, useCallback, useState } from 'react';
 import { BaseEChart } from '@/components/BaseEChart';
 import type { DAGChartProps, EChartsRef, DAGNode, DAGLink } from '@/types';
-import type { EChartsOption, GraphSeriesOption, CustomSeriesOption } from 'echarts';
+import type { EChartsOption, GraphSeriesOption } from 'echarts';
 
 // Enhanced type definitions for better type safety
 interface NodeConnectivity {
@@ -63,16 +63,6 @@ interface EChartsNodeData {
   };
 }
 
-interface Point {
-  x: number;
-  y: number;
-}
-
-interface DAGPortNode extends Point {
-  width: number;
-  height: number;
-}
-
 interface EChartsEventParams {
   dataType: 'node' | 'edge';
   data: EChartsNodeData | EdgeData;
@@ -84,116 +74,8 @@ interface EdgeData {
   value?: number;
 }
 
-// Enhanced Manhattan layout implementation
-class ManhattanLayout {
-  private static readonly INSET = 16;
-
-  /**
-   * Enhanced Manhattan edge algorithm with proper Z-shaped routing
-   */
-  static calculateManhattanPath(source: Point, target: Point, direction: 'LR' | 'TB' = 'LR'): Point[] {
-    const sourceNode: DAGPortNode = { x: source.x, y: source.y, width: 50, height: 50 };
-    const targetNode: DAGPortNode = { x: target.x, y: target.y, width: 50, height: 50 };
-
-    // Calculate port positions based on nearest sides
-    const sourcePorts = this.calculatePorts(sourceNode, targetNode, direction);
-    const targetPorts = this.calculatePorts(targetNode, sourceNode, direction, true);
-
-    // Generate Z-shaped path
-    return this.generateZPath(sourcePorts.best, targetPorts.best, direction);
-  }
-
-  /**
-   * Calculate port positions with 16px insets
-   */
-  private static calculatePorts(node: DAGPortNode, otherNode: DAGPortNode, direction: 'LR' | 'TB', isTarget = false) {
-    const { x, y, width, height } = node;
-    const centerX = x + width / 2;
-    const centerY = y + height / 2;
-
-    if (direction === 'LR') {
-      // Horizontal layout - use left/right ports
-      const rightPort = { x: x + width - this.INSET, y: centerY };
-      const leftPort = { x: x + this.INSET, y: centerY };
-
-      if (isTarget) {
-        return {
-          best: otherNode.x < node.x ? rightPort : leftPort,
-          alternative: otherNode.x < node.x ? leftPort : rightPort,
-        };
-      } else {
-        return {
-          best: otherNode.x > node.x ? rightPort : leftPort,
-          alternative: otherNode.x > node.x ? leftPort : rightPort,
-        };
-      }
-    } else {
-      // Vertical layout - use top/bottom ports
-      const bottomPort = { x: centerX, y: y + height - this.INSET };
-      const topPort = { x: centerX, y: y + this.INSET };
-
-      if (isTarget) {
-        return {
-          best: otherNode.y < node.y ? bottomPort : topPort,
-          alternative: otherNode.y < node.y ? topPort : bottomPort,
-        };
-      } else {
-        return {
-          best: otherNode.y > node.y ? bottomPort : topPort,
-          alternative: otherNode.y > node.y ? topPort : bottomPort,
-        };
-      }
-    }
-  }
-
-  /**
-   * Generate Z-shaped path with 2 bends
-   */
-  private static generateZPath(sourcePort: Point, targetPort: Point, direction: 'LR' | 'TB'): Point[] {
-    const isHorizontalDominant = Math.abs(sourcePort.x - targetPort.x) > Math.abs(sourcePort.y - targetPort.y);
-
-    if (direction === 'LR' || isHorizontalDominant) {
-      // Horizontal-dominant Z-shape
-      const midX = (sourcePort.x + targetPort.x) / 2;
-      return [sourcePort, { x: midX, y: sourcePort.y }, { x: midX, y: targetPort.y }, targetPort];
-    } else {
-      // Vertical-dominant Z-shape
-      const midY = (sourcePort.y + targetPort.y) / 2;
-      return [sourcePort, { x: sourcePort.x, y: midY }, { x: targetPort.x, y: midY }, targetPort];
-    }
-  }
-
-  /**
-   * Remove redundant points that are on the same line
-   */
-  static withoutRedundantPoints(waypoints: Point[]): Point[] {
-    return waypoints.reduce((points: Point[], p: Point, idx: number) => {
-      const previous = points[points.length - 1];
-      const next = waypoints[idx + 1];
-
-      if (!this.pointsOnLine(previous, next, p)) {
-        points.push(p);
-      }
-
-      return points;
-    }, []);
-  }
-
-  /**
-   * Check if three points are on the same line
-   */
-  private static pointsOnLine(a?: Point, b?: Point, c?: Point): boolean {
-    if (!a || !b || !c) return false;
-
-    const horizontallyAligned = a.y === b.y && b.y === c.y;
-    const verticallyAligned = a.x === b.x && b.x === c.x;
-
-    return horizontallyAligned || verticallyAligned;
-  }
-}
-
 /**
- * Enhanced DAG Chart component with proper Manhattan routing and descendant collapsing
+ * Enhanced DAG Chart component with curved and straight edge support
  */
 export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
   (
@@ -468,8 +350,6 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
         switch (edgeStyle) {
           case 'curved':
             return { curveness: 0.3, type: 'solid' as const, width: 2 };
-          case 'manhattan':
-            return { curveness: 0, type: 'solid' as const, width: 2, opacity: 0 }; // Hide default edges
           default:
             return { curveness: 0, type: 'solid' as const, width: 2 };
         }
@@ -555,114 +435,6 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
             },
           };
         });
-
-      // Manhattan edge routing using enhanced algorithm
-      const manhattanSeries: CustomSeriesOption[] =
-        edgeStyle === 'manhattan' && layout === 'layered'
-          ? [
-              {
-                type: 'custom',
-                coordinateSystem: 'none',
-                data: processedData.links
-                  .filter((link) => !link.hidden)
-                  .map((link) => {
-                    const sourceNode = positionedNodes.find((n) => n.id === link.source);
-                    const targetNode = positionedNodes.find((n) => n.id === link.target);
-
-                    if (
-                      !sourceNode ||
-                      !targetNode ||
-                      sourceNode.x === undefined ||
-                      sourceNode.y === undefined ||
-                      targetNode.x === undefined ||
-                      targetNode.y === undefined
-                    ) {
-                      return null;
-                    }
-
-                    const path = ManhattanLayout.calculateManhattanPath(
-                      { x: sourceNode.x, y: sourceNode.y },
-                      { x: targetNode.x, y: targetNode.y },
-                      direction,
-                    );
-
-                    return {
-                      path: ManhattanLayout.withoutRedundantPoints(path),
-                      link: link,
-                    };
-                  })
-                  .filter((item): item is { path: Point[]; link: DAGLink } => item !== null),
-                renderItem: (params) => {
-                  const data = params.data;
-                  if (!data || !data.path) return null;
-
-                  const { path } = data;
-                  if (path.length < 2) return null;
-
-                  const children = [];
-
-                  // Draw the polyline
-                  children.push({
-                    type: 'polyline',
-                    shape: {
-                      points: path.map((point) => [point.x, point.y]),
-                    },
-                    style: {
-                      stroke: data.link.lineStyle?.color || '#999',
-                      lineWidth: data.link.lineStyle?.width || 2,
-                      fill: 'none',
-                      opacity: data.link.lineStyle?.opacity || 0.8,
-                    },
-                  });
-
-                  // Add arrowhead at the end
-                  if (path.length >= 2) {
-                    const lastPoint = path[path.length - 1];
-                    const secondLastPoint = path[path.length - 2];
-
-                    // Calculate arrow direction
-                    const dx = lastPoint.x - secondLastPoint.x;
-                    const dy = lastPoint.y - secondLastPoint.y;
-                    const length = Math.sqrt(dx * dx + dy * dy);
-
-                    if (length > 0) {
-                      const unitX = dx / length;
-                      const unitY = dy / length;
-                      const arrowSize = 8;
-
-                      children.push({
-                        type: 'polygon',
-                        shape: {
-                          points: [
-                            [lastPoint.x, lastPoint.y],
-                            [
-                              lastPoint.x - arrowSize * unitX - arrowSize * unitY * 0.5,
-                              lastPoint.y - arrowSize * unitY + arrowSize * unitX * 0.5,
-                            ],
-                            [
-                              lastPoint.x - arrowSize * unitX + arrowSize * unitY * 0.5,
-                              lastPoint.y - arrowSize * unitY - arrowSize * unitX * 0.5,
-                            ],
-                          ],
-                        },
-                        style: {
-                          fill: data.link.lineStyle?.color || '#999',
-                          stroke: data.link.lineStyle?.color || '#999',
-                        },
-                      });
-                    }
-                  }
-
-                  return {
-                    type: 'group',
-                    children,
-                  };
-                },
-                silent: false,
-                z: 2,
-              },
-            ]
-          : [];
 
       const generatedOption: EChartsOption = {
         title: {
@@ -769,7 +541,7 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
             lineStyle: {
               color: '#999',
               width: 2,
-              curveness: 0,
+              curveness: edgeStyle === 'curved' ? 0.3 : 0,
               opacity: 0.8,
             },
             emphasis: {
@@ -789,7 +561,6 @@ export const DAGChart = forwardRef<EChartsRef, DAGChartProps>(
             animationDuration: 800,
             animationEasing: 'cubicOut',
           } as GraphSeriesOption,
-          ...manhattanSeries,
         ],
       };
 
