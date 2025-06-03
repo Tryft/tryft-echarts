@@ -1,5 +1,3 @@
- 
- 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import { D3DAGChartProps, D3DAGNode, D3DAGPoint, D3DAGLink, D3DAGData } from '@/types';
@@ -417,7 +415,7 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
       })),
       links: visibleLinks,
     } as D3DAGData;
-  }, [data, collapsedNodes, hiddenCategories, getCollapsibleDescendants]);
+  }, [data, collapsedNodes, getCollapsibleDescendants]);
 
   // Show tooltip near cursor
   const showTooltip = useCallback((content: string, event: MouseEvent) => {
@@ -775,6 +773,7 @@ const D3DAGChart: React.FC<D3DAGChartProps> = ({
     onEdgeClick,
     getFullPaths,
     nodePositions,
+    hiddenCategories,
   ]);
   useEffect(() => {
     setNodePositions(new Map());
