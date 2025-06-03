@@ -84,13 +84,62 @@ export interface PieChartProps extends BaseEChartsProps {
 export interface TreeNodeData {
   name: string;
   value?: number;
-  children?: TreeNodeData[];
   description?: string;
-  [key: string]: unknown;
+  children?: TreeNodeData[];
+  collapsed?: boolean;
+  x?: number;
+  y?: number;
+  fx?: number | null;
+  fy?: number | null;
+}
+
+/**
+ * DAG (Directed Acyclic Graph) node for manufacturing/production workflows
+ */
+export interface DAGNode {
+  id: string;
+  name: string;
+  value?: number;
+  description?: string;
+  category?: number;
+  level?: number; // For layer-based positioning
+  x?: number;
+  y?: number;
+  fx?: number | null;
+  fy?: number | null;
+  symbolSize?: number;
+  draggable?: boolean;
+  collapsed?: boolean; // For branch collapsing
+  hidden?: boolean; // For hiding collapsed branches
+}
+
+/**
+ * DAG link/edge for manufacturing/production relationships
+ */
+export interface DAGLink {
+  source: string;
+  target: string;
+  value?: number;
+  label?: string; // Label text for the edge
+  lineStyle?: {
+    color?: string;
+    width?: number;
+    type?: 'solid' | 'dashed' | 'dotted';
+  };
+  hidden?: boolean; // For hiding collapsed branches
+}
+
+/**
+ * DAG data structure for complex manufacturing/production relationships
+ */
+export interface DAGData {
+  nodes: DAGNode[];
+  links: DAGLink[];
+  categories?: { name: string; itemStyle?: { color?: string } }[];
 }
 
 export interface TreeChartProps extends BaseEChartsProps {
-  /** Data for the tree chart - can be single node or array for multiple root nodes */
+  /** Data for the tree chart - can be tree structure or array for multiple root nodes */
   data?: TreeNodeData | TreeNodeData[];
   /** Tree layout orientation */
   layout?: 'orthogonal' | 'radial';
@@ -102,6 +151,49 @@ export interface TreeChartProps extends BaseEChartsProps {
   symbolSize?: number | number[];
   /** Callback when a node is clicked (called after expansion animation) */
   onNodeClick?: (nodeData: TreeNodeData, params: unknown) => void;
+}
+
+/**
+ * Edge style types for DAG Chart
+ */
+export type EdgeStyle = 'straight' | 'curved';
+
+/**
+ * DAG Chart props for manufacturing workflows with layered layout
+ */
+export interface DAGChartProps extends BaseEChartsProps {
+  /** DAG data structure with nodes and links */
+  data: DAGData;
+  /** Layout algorithm - 'layered' positions nodes by level, 'force' uses physics simulation */
+  layout?: 'layered' | 'force';
+  /** Flow direction for layered layout */
+  direction?: 'LR' | 'TB';
+  /** Edge style - straight lines, smooth curves, or Manhattan (right-angled) */
+  edgeStyle?: EdgeStyle;
+  /** Enable node dragging */
+  draggable?: boolean;
+  /** Enable zooming and panning */
+  roam?: boolean;
+  /** Show edge labels */
+  showEdgeLabels?: boolean;
+  /** Enable branch collapsing on double-click */
+  collapsible?: boolean;
+  /** Callback when a node is clicked */
+  onNodeClick?: (nodeData: DAGNode, params: unknown) => void;
+  /** Callback when a node is double-clicked */
+  onNodeDoubleClick?: (nodeData: DAGNode, params: unknown) => void;
+  /** Callback when an edge is clicked */
+  onEdgeClick?: (linkData: DAGLink, params: unknown) => void;
+  /** Callback when a node is dragged (unused) */
+  _onNodeDrag?: (nodeData: DAGNode, position: [number, number]) => void;
+  /** Force layout options (when layout='force') */
+  force?: {
+    repulsion?: number;
+    gravity?: number;
+    edgeLength?: number | [number, number];
+    friction?: number;
+    layoutAnimation?: boolean;
+  };
 }
 
 export interface TreemapChartProps extends BaseEChartsProps {
@@ -183,4 +275,70 @@ export interface EChartsRef {
   getEchartsInstance: () => ECharts | null;
   /** Refresh the chart */
   refresh: () => void;
+}
+
+/**
+ * Interfaces for D3DAGChart component using D3.js
+ */
+
+export interface D3DAGNode {
+  id: string;
+  name: string;
+  value?: number;
+  level?: number;
+  category?: string;
+  x?: number;
+  y?: number;
+  // Internal properties
+  fx?: number;
+  fy?: number;
+  index?: number;
+  collapsed?: boolean;
+  descendantCount?: number;
+  originalChildren?: string[];
+  vx?: number;
+  vy?: number;
+}
+
+export interface D3DAGLink {
+  source: D3DAGNode; // Can be a node or ID
+  target: D3DAGNode; // Can be a node or ID
+  value?: number;
+  label?: string;
+  lineStyle?: { color?: string; width?: number; type?: string };
+  // Internal properties
+  hidden?: boolean;
+}
+
+export interface D3DAGCategory {
+  name: string;
+  itemStyle: { color: string };
+}
+
+export interface D3DAGData {
+  nodes: D3DAGNode[];
+  links: D3DAGLink[];
+  categories?: D3DAGCategory[];
+}
+
+export interface D3DAGPoint {
+  x: number;
+  y: number;
+}
+
+export interface D3DAGChartProps {
+  data: D3DAGData;
+  width?: number;
+  height?: number;
+  layout?: 'force' | 'layered';
+  direction?: 'LR' | 'TB' | 'RL' | 'BT';
+  onNodeClick?: (node: D3DAGNode, event: Event) => void;
+  onNodeDoubleClick?: (node: D3DAGNode, event: Event) => void;
+  onEdgeClick?: (link: D3DAGLink, event: Event) => void;
+  nodeSize?: number;
+  edgeInset?: number;
+  animationDuration?: number;
+  enableZoom?: boolean;
+  enableDrag?: boolean;
+  hiddenCategories?: Set<string>;
 }
