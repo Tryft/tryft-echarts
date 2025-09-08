@@ -39,7 +39,7 @@ jobs:
         continue-on-error: true
 
       - name: Comment PR with lint results
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
@@ -136,7 +136,7 @@ jobs:
           fi
 
       - name: Comment PR with build results
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
@@ -249,7 +249,7 @@ jobs:
         run: git merge --abort 2>/dev/null || git reset --hard HEAD
 
       - name: Comment PR with merge simulation
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
@@ -298,7 +298,7 @@ jobs:
     if: always()
     steps:
       - name: Create PR summary
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const lintStatus = '${{ needs.lint.result }}';
