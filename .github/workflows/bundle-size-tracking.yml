@@ -252,7 +252,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Download bundle size data
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: bundle-size-data
 
